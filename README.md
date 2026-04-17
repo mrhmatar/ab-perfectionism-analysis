@@ -96,16 +96,6 @@ These scripts automatically source the required data preparation files, so no se
 
 If you use this code, please cite this repository as:
 
-<button onclick="navigator.clipboard.writeText(`@misc{matar2026abperfectionism,
-  author       = {Matar, M.},
-  title        = {ab-perfectionism-analysis: Analysis of Attention Biases in Perfectionism},
-  year         = {2026},
-  howpublished = {\\url{https://github.com/<your-username>/ab-perfectionism-analysis}},
-  note         = {GitHub repository}
-}`)">
-Copy BibTeX
-</button>
-
 ```bibtex
 @misc{matar2026abperfectionism,
   author       = {Matar, M.},

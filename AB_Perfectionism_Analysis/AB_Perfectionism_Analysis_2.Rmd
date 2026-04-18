@@ -1459,7 +1459,7 @@ grid.arrange(
 ```
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-## 2 Latency to First Fixation
+## 2. Latency to First Fixation
 
 No models were fitted, as no effects of perfectionism were observed in Study 1.
 

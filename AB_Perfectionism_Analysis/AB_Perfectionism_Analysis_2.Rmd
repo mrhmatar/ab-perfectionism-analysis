@@ -2712,55 +2712,18 @@ stat.desc(res_lm1.2_negative, norm = TRUE)
 
 To visualize the associations between perfectionism and mood change across ABM conditions, interaction plots were generated separately for positive and negative mood, and for Perfectionistic Strivings and Perfectionistic Concerns.
 
-```{r lm1_interaction_plot_study2, fig.width=15, fig.height=10}
+```{r lm1.1_interaction_plot_study2, fig.width=12, fig.height=4}
+  # Positive mood
 lm2.1_positive <- lm(
-  POS_34 ~ Perf_Strivings_c * Condition,
-  data = qu2
-)
+  POS_34 ~ 
+    Perf_Strivings_c*Condition,
+  data = qu2)
 
-ip_pos_1 <- plot_model(
-  lm2.1_positive,
-  type = "int",
-  mdrt.values = "all",
-  ci.lvl = NA,
-  legend.title = "ABM Condition"
-) + 
-  labs(
-    title = "Positive Mood After Tangram Task",
-    x = "Perfectionistic Strivings",
-    y = ""
-  ) +
-  geom_line(size = 1) +
-  theme_minimal() +
+ip_pos_1 <- plot_model(lm2.1_positive, type = "int", mdrt.values="all", ci.lvl=NA, legend.title = "ABM Condition") + 
+  labs(title="", x = "Perfectionistic Strivings", y = "") +
+  geom_line(size = 1) + theme_minimal() +
   theme(
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10),
-    axis.title.x = element_text(size = 14),
-    axis.title.y = element_text(size = 14),
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12)
-  )
-
-lm2.1_negative <- lm(
-  NEG_34 ~ Perf_Strivings_c * Condition,
-  data = qu2
-)
-
-ip_neg_1 <- plot_model(
-  lm2.1_negative,
-  type = "int",
-  mdrt.values = "all",
-  ci.lvl = NA,
-  legend.title = "ABM Condition"
-) + 
-  labs(
-    title = "Negative Mood After Tangram Task",
-    x = "Perfectionistic Strivings",
-    y = ""
-  ) +
-  geom_line(size = 1) +
-  theme_minimal() +
-  theme(
+    legend.position = "right",
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10),
     axis.title.x = element_text(size = 14),
@@ -2770,25 +2733,41 @@ ip_neg_1 <- plot_model(
   )
 
 lm2.2_positive <- lm(
-  POS_34 ~ Perf_Concerns_c * Condition,
-  data = qu2
-)
+  POS_34 ~ 
+    Perf_Concerns_c*Condition,
+  data = qu2)
 
-ip_pos_2 <- plot_model(
-  lm2.2_positive,
-  type = "int",
-  mdrt.values = "all",
-  ci.lvl = NA,
-  legend.title = "ABM Condition"
-) + 
-  labs(
-    title = "Positive Mood After Tangram Task",
-    x = "Perfectionistic Concerns",
-    y = ""
-  ) +
-  geom_line(size = 1) +
-  theme_minimal() +
+ip_pos_2 <- plot_model(lm2.2_positive, type = "int", mdrt.values="all", ci.lvl=NA, legend.title = "ABM Condition") + 
+  labs(title="", x = "Perfectionistic Concerns", y = "") +
+  geom_line(size = 1) + theme_minimal()+
   theme(
+    legend.position = "right",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12)
+  )
+
+grid.arrange(ip_pos_1, ip_pos_2,
+             ncol = 2, nrow = 1,
+             top = textGrob("Positive Mood After Tangram",
+                            gp = gpar(fontsize = 16, fontface = "bold")))
+```
+
+```{r lm1.2_interaction_plot_study2, fig.width=12, fig.height=4}
+# Negative Mood
+lm2.1_negative <- lm(
+  NEG_34 ~ 
+    Perf_Strivings_c*Condition,
+  data = qu2)
+
+ip_neg_1 <-plot_model(lm2.1_negative, type = "int", mdrt.values="all", ci.lvl=NA, legend.title = "ABM Condition") + 
+  labs(title="", x = "Perfectionistic Strivings", y = "") +
+  geom_line(size = 1) + theme_minimal()+
+  theme(
+    legend.position = "right",
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10),
     axis.title.x = element_text(size = 14),
@@ -2798,25 +2777,15 @@ ip_pos_2 <- plot_model(
   )
 
 lm2.2_negative <- lm(
-  NEG_34 ~ Perf_Concerns_c * Condition,
-  data = qu2
-)
+  NEG_34 ~ 
+    Perf_Concerns_c*Condition,
+  data = qu2)
 
-ip_neg_2 <- plot_model(
-  lm2.2_negative,
-  type = "int",
-  mdrt.values = "all",
-  ci.lvl = NA,
-  legend.title = "ABM Condition"
-) + 
-  labs(
-    title = "Negative Mood After Tangram Task",
-    x = "Perfectionistic Concerns",
-    y = ""
-  ) +
-  geom_line(size = 1) +
-  theme_minimal() +
+ip_neg_2 <-plot_model(lm2.2_negative, type = "int", mdrt.values="all", ci.lvl=NA, legend.title = "ABM Condition") + 
+  labs(title="", x = "Perfectionistic Concerns", y = "") +
+  geom_line(size = 1) + theme_minimal()+
   theme(
+    legend.position = "right",
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10),
     axis.title.x = element_text(size = 14),
@@ -2825,9 +2794,8 @@ ip_neg_2 <- plot_model(
     axis.text.y = element_text(size = 12)
   )
 
-grid.arrange(
-  ip_pos_1, ip_neg_1,
-  ip_pos_2, ip_neg_2,
-  ncol = 2, nrow = 2
-)
+grid.arrange(ip_neg_1, ip_neg_2,
+             ncol = 2, nrow = 1, 
+             top = textGrob("Negative Mood After Tangram",
+                            gp = gpar(fontsize = 16, fontface = "bold")))
 ```

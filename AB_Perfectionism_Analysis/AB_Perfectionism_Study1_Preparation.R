@@ -412,7 +412,6 @@ et_qu$Change_category01[inds] <- +1
 
 # Quick residuals vs fitted plot
 diag_resid_fitted <- function(model) {
-  x11(width = 8, height = 6)
   
   ggplot(
     data.frame(
@@ -444,8 +443,6 @@ diag_ppc_beta <- function(model) {
   
   observed_values <- model$y
   
-  x11(width = 8, height = 6)
-  
   ggplot() +
     geom_density(aes(x = observed_values, color = "Observed"), linetype = "dashed", linewidth = 1) +
     geom_density(aes(x = predicted_values, color = "Predicted"), linewidth = 1) +
@@ -469,8 +466,6 @@ diag_ppc_gamma <- function(model) {
   predicted_values <- rgamma(length(mu_hat), shape = alpha_hat, scale = beta_hat)
   
   observed_values <- model$y
-  
-  x11(width = 8, height = 6)
   
   ggplot() +
     geom_density(aes(x = observed_values, color = "Observed"), linetype = "dashed", linewidth = 1) +

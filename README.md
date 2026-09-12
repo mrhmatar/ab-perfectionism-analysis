@@ -8,12 +8,12 @@ This repository contains the R code and supporting materials associated with:
 
 The complete annotated analyses are available in the knitted HTML reports:
 
-- [Study 1 analysis report](reports/AB_Perfectionism_Analysis_1.html)
-- [Study 2 analysis report](reports/AB_Perfectionism_Analysis_2.html)
+- [Study 1 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_1.html)
+- [Study 2 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_2.html)
 
-These reports contain the descriptive statistics, statistical models, model comparisons, diagnostic plots, estimated trends, planned comparisons, and substantive figures used to interpret the findings.
+These reports contain the sample characteristics, descriptive statistics, statistical models, model comparisons, diagnostic plots, estimated trends, planned comparisons, and substantive figures used to interpret the findings.
 
-The corresponding `.Rmd` files contain the source code used to generate the reports. Streamlined `.R` scripts are also provided for rerunning the analyses and saving the principal outputs.
+The corresponding `.Rmd` files contain the complete source code used to prepare the data and generate the reports. The HTML reports allow readers to examine the analytical workflow and output without installing R or obtaining the participant-level data.
 
 ## Overview
 
@@ -62,7 +62,7 @@ Study 2 manipulation checks used baseline-adjusted models comparing post-manipul
 ## Repository contents
 
 ```text
-AB_Perfectionism_Analysis/
+ab-perfectionism-analysis/
 ├── README.md
 ├── CITATION.cff
 ├── LICENSE
@@ -82,7 +82,7 @@ AB_Perfectionism_Analysis/
     └── README.md
 ```
 
-## File descriptions
+The R Markdown documents provide the complete annotated workflows. The streamlined `.R` files separate data preparation from model fitting and are convenient for rerunning analyses and saving principal outputs. Each main or supplementary analysis script sources the corresponding preparation file automatically.
 
 ### Knitted analysis reports
 
@@ -108,41 +108,39 @@ Complete knitted Study 2 report containing:
 - model comparisons and diagnostics; and
 - interaction figures.
 
-The HTML files are generated from the corresponding `.Rmd` documents. They allow readers to examine the complete analytical workflow without installing R or obtaining access to the participant-level data.
-
-### Main analysis reports
+### R Markdown source documents
 
 #### `AB_Perfectionism_Analysis_1.Rmd`
 
-Source R Markdown document used to generate the complete annotated Study 1 report. It contains the data-preparation steps, statistical models, model comparisons, diagnostics, follow-up analyses, and figures.
+Source document used to generate the complete annotated Study 1 report. It contains the data-preparation steps, statistical models, model comparisons, diagnostics, follow-up analyses, and figures.
 
 #### `AB_Perfectionism_Analysis_2.Rmd`
 
-Source R Markdown document used to generate the complete annotated Study 2 report. It contains the data-preparation steps, manipulation checks, primary analyses, model comparisons, diagnostics, and figures.
+Source document used to generate the complete annotated Study 2 report. It contains the data-preparation steps, manipulation checks, primary analyses, model comparisons, diagnostics, and figures.
 
 ### Data-preparation scripts
 
 #### `AB_Perfectionism_Study1_Preparation.R`
 
-Imports and prepares the Study 1 questionnaire, eye-tracking, and response-time data. It defines the task-completer sample, derives the analysis variables, centers the time predictors, and prepares the semantic-category factor.
+Imports and prepares the Study 1 questionnaire, eye-tracking, and response-time data. It applies the analytical exclusions, defines the task-completer sample, derives the attentional indices and questionnaire composites, centers the task-order and perfectionism predictors, and prepares the semantic-category variables required by the main and supplementary models.
 
 #### `AB_Perfectionism_Study2_Preparation.R`
 
-Imports and prepares the Study 2 questionnaire, experimental, eye-tracking, and response-time data. It defines the task-completer sample, derives the experimental-condition and time variables, and prepares the baseline and post-manipulation outcomes.
+Imports and prepares the Study 2 questionnaire, experimental, eye-tracking, and response-time data. It applies the analytical exclusions, retains participants with the required task data, constructs paired pre- and post-manipulation outcomes, derives task-accuracy and rule-awareness variables, centers the required predictors, and prepares condition and semantic-category variables.
 
-The preparation scripts are sourced automatically by the corresponding analysis scripts. They should remain in the project directory and do not need to be run separately.
+The preparation scripts contain no descriptive tables or exploratory plots. They are sourced automatically by the corresponding analysis scripts and do not need to be run separately.
 
 ### Main analysis scripts
 
 #### `AB_Perfectionism_Study1_Analysis.R`
 
-Runs the Study 1 primary models and produces the model comparisons, diagnostics, estimated trends, planned comparisons, and interaction figures.
+Runs the Study 1 primary attentional models and produces model comparisons, diagnostics, estimated category-specific trends, planned theoretical comparisons, and interaction figures.
 
 #### `AB_Perfectionism_Study2_Analysis.R`
 
-Runs the Study 2 attention-bias modification checks and the primary analyses of emotional responses to the failure task.
+Runs the Study 2 attention-bias modification checks and primary analyses of emotional responses to the failure task.
 
-### Supplementary analyses
+### Supplementary analysis scripts
 
 #### `AB_Perfectionism_Study1_Sup_Ctrl.R`
 
@@ -158,26 +156,27 @@ Tests perfectionism-related attentional patterns in the Study 2 subsample using 
 
 Describes the data files and variables required to reproduce the analyses, together with the principal exclusion and preprocessing procedures.
 
-The participant-level data are not included in the public repository. Researchers who obtain the data from the corresponding author should place the supplied files in an `AB_Perfectionism_Data/` directory at the repository root. This preserves the relative paths used by the analysis scripts.
+The participant-level data are not included in the public repository. Researchers who obtain the data from the corresponding author should place the supplied files in an `AB_Perfectionism_Data/` directory at the repository root. This preserves the relative paths used by the R Markdown documents.
 
 ## Viewing the HTML reports
 
-The HTML reports are self-contained and can be downloaded and opened in a web browser without installing R.
+The HTML reports are self-contained and can be viewed directly through GitHub Pages without installing R:
 
-GitHub may display an HTML file as source code or offer it as a download rather than rendering it as a webpage. Readers can download the repository and open either of the following files locally:
+- [Study 1 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_1.html)
+- [Study 2 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_2.html)
+
+Readers can alternatively download and open these files locally:
 
 ```text
 reports/AB_Perfectionism_Analysis_1.html
 reports/AB_Perfectionism_Analysis_2.html
 ```
 
-The reports may also be published through GitHub Pages to provide browser-accessible versions.
-
 ## How to use this repository
 
 ### Viewing the completed analyses
 
-Readers who only wish to examine the analyses can download and open the knitted HTML reports. Access to the participant-level data is not required to view the reported output.
+Readers who only wish to examine the analyses can use the GitHub Pages links or download the knitted HTML reports. Access to the participant-level data is not required to view the reported output.
 
 ### Reproducing the analyses
 
@@ -189,7 +188,7 @@ git clone https://github.com/mrhmatar/ab-perfectionism-analysis.git
 
 2. Open `AB_Perfectionism_Analysis.Rproj` in RStudio.
 
-3. Preserve the repository’s directory structure. The scripts use paths relative to the project root.
+3. Preserve the repository’s directory structure. The documents use paths relative to the project root.
 
 4. Request the deidentified data from the corresponding author.
 
@@ -220,9 +219,7 @@ The main and supplementary analysis scripts source their corresponding preparati
 
 ## Knitting the analysis reports
 
-The reports should be generated as self-contained HTML files so that their figures and other resources are embedded in the output.
-
-The R Markdown YAML header should include:
+The reports should be generated as self-contained HTML files so that their figures and other resources are embedded in the output. The R Markdown YAML header should include:
 
 ```yaml
 output:
@@ -230,27 +227,21 @@ output:
     self_contained: true
 ```
 
-The reports can be rendered from R with:
+The reports can be rendered into `reports/` with:
 
 ```r
+dir.create("reports", showWarnings = FALSE)
+
 rmarkdown::render(
   input = "AB_Perfectionism_Analysis_1.Rmd",
-  output_file = file.path(
-    "reports",
-    "AB_Perfectionism_Analysis_1.html"
-  )
+  output_file = "AB_Perfectionism_Analysis_1.html",
+  output_dir = "reports"
 )
-```
 
-and:
-
-```r
 rmarkdown::render(
   input = "AB_Perfectionism_Analysis_2.Rmd",
-  output_file = file.path(
-    "reports",
-    "AB_Perfectionism_Analysis_2.html"
-  )
+  output_file = "AB_Perfectionism_Analysis_2.html",
+  output_dir = "reports"
 )
 ```
 
@@ -261,7 +252,7 @@ AB_Perfectionism_Analysis_1_files/
 AB_Perfectionism_Analysis_2_files/
 ```
 
-Those directories would also need to be included for the HTML reports to display correctly.
+Those directories would also need to be included for the reports to display correctly.
 
 ## Software requirements
 
@@ -277,23 +268,23 @@ The principal R packages include:
 - `DHARMa` and supporting packages for model diagnostics; and
 - `rmarkdown` for generating the annotated analysis reports.
 
-Package dependencies are loaded within the scripts. A future version of the repository may include an `renv.lock` file to preserve the exact package versions.
+Package dependencies are loaded within the documents. A future version of the repository may include an `renv.lock` file to preserve the exact package versions.
 
 ## Reproducibility notes
 
 - The repository is organized as a self-contained R project.
 - File paths assume that the working directory is the project root.
 - The directory structure should be preserved.
-- Preparation scripts are sourced automatically by the corresponding analysis scripts.
 - The knitted HTML reports provide the most accessible record of the completed analyses.
 - The `.Rmd` files provide the complete reproducible source documents.
-- The `.R` scripts provide streamlined versions for rerunning analyses and saving figures.
+- The preparation scripts create the analysis-ready objects required by the main and supplementary `.R` scripts.
+- The main and supplementary `.R` scripts source their corresponding preparation scripts automatically.
 - The participant-level data must be obtained separately from the corresponding author.
 - This is the first public release of the analysis code. Development and earlier versions were maintained privately before creation of this repository.
 
 ## Data availability
 
-The participant-level data are not publicly available. Deidentified data may be obtained from the corresponding author upon reasonable request, subject to applicable ethical, institutional, and data-protection requirements.
+The participant-level data are not publicly available. Deidentified data may be obtained from the corresponding author upon reasonable request, subject to applicable ethical, institutional, consent, and data-protection requirements.
 
 The public repository contains the analysis code, knitted reports, and documentation needed to describe the analytical workflow, but it does not contain participant-level data.
 
@@ -302,7 +293,7 @@ The public repository contains the analysis code, knitted reports, and documenta
 If you use these materials in academic work, please cite the associated paper:
 
 ```bibtex
-@unpublished{matar2026attention,
+@unpublished{matardelor2026abperfectionism,
   author = {Matar, M. and Delor, B. and Douilliez, C. and Philippot, P.},
   title  = {Attention Bias and Emotional Reactivity in Perfectionism:
             Eye-Tracking and Experimental Evidence for Context-Dependent Effects},
@@ -348,6 +339,6 @@ Citation metadata are also provided in `CITATION.cff`.
 
 ## License
 
-The analysis code is released under the [MIT License / GNU General Public License v3.0].
+The analysis code is released under the [MIT License](LICENSE). Copyright © 2026 Mariah Matar.
 
 The participant-level data are not distributed under this license. Manuscript materials and other supporting files may be subject to separate reuse conditions.

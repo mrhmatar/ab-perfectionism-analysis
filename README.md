@@ -256,7 +256,7 @@ If you use these materials in academic work, please cite the associated paper:
   title  = {Attention Bias and Emotional Reactivity in Perfectionism:
             Eye-Tracking and Experimental Evidence for Context-Dependent Effects},
   year   = {2026},
-  note   = {Manuscript in preparation}
+  note = {Manuscript in preparation. Mariah Matar and Bérénice Delor contributed equally and share first authorship}
 }
 ```
 

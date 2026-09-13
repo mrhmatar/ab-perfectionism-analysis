@@ -8,8 +8,8 @@ This repository contains the R code and supporting materials associated with:
 
 The complete annotated analyses are available in the knitted HTML reports:
 
-- [Study 1 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_1.html)
-- [Study 2 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_2.html)
+- [Study 1 analysis report](https://htmlpreview.github.io/?https://github.com/mrhmatar/ab-perfectionism-analysis/blob/main/reports/AB_Perfectionism_Analysis_1.html)
+- [Study 2 analysis report](https://htmlpreview.github.io/?https://github.com/mrhmatar/ab-perfectionism-analysis/blob/main/reports/AB_Perfectionism_Analysis_2.html)
 
 These reports contain the sample characteristics, descriptive statistics, statistical models, model comparisons, diagnostic plots, estimated trends, planned comparisons, and substantive figures used to interpret the findings.
 
@@ -68,6 +68,7 @@ ab-perfectionism-analysis/
 ├── LICENSE
 ├── AB_Perfectionism_Analysis.Rproj
 ├── AB_Perfectionism_Analysis_1.Rmd
+├── AB_Perfectionism_Analysis_2.Rmd
 ├── AB_Perfectionism_Study1_Preparation.R
 ├── AB_Perfectionism_Study1_Sup_Ctrl.R
 ├── AB_Perfectionism_Study2_Preparation.R
@@ -79,7 +80,7 @@ ab-perfectionism-analysis/
     └── README.md
 ```
 
-The R Markdown documents provide the complete annotated workflows. The streamlined `.R` files separate data preparation from model fitting and are convenient for rerunning analyses and saving principal outputs. Each main or supplementary analysis script sources the corresponding preparation file automatically.
+The R Markdown documents provide the complete annotated workflows. The preparation scripts create the analysis-ready objects used by the supplementary scripts, and each supplementary script sources the corresponding preparation file automatically.
 
 ### Knitted analysis reports
 
@@ -147,10 +148,10 @@ The participant-level data are not included in the public repository. Researcher
 
 ## Viewing the HTML reports
 
-The HTML reports are self-contained and can be viewed directly through GitHub Pages without installing R:
+The self-contained HTML reports can be viewed in a browser through HTMLPreview without installing R or enabling GitHub Pages:
 
-- [Study 1 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_1.html)
-- [Study 2 analysis report](https://mrhmatar.github.io/ab-perfectionism-analysis/reports/AB_Perfectionism_Analysis_2.html)
+- [Study 1 analysis report](https://htmlpreview.github.io/?https://github.com/mrhmatar/ab-perfectionism-analysis/blob/main/reports/AB_Perfectionism_Analysis_1.html)
+- [Study 2 analysis report](https://htmlpreview.github.io/?https://github.com/mrhmatar/ab-perfectionism-analysis/blob/main/reports/AB_Perfectionism_Analysis_2.html)
 
 Readers can alternatively download and open these files locally:
 
@@ -163,7 +164,7 @@ reports/AB_Perfectionism_Analysis_2.html
 
 ### Viewing the completed analyses
 
-Readers who only wish to examine the analyses can use the GitHub Pages links or download the knitted HTML reports. Access to the participant-level data is not required to view the reported output.
+Readers who only wish to examine the analyses can use the HTMLPreview links or download the knitted HTML reports. Access to the participant-level data is not required to view the reported output.
 
 ### Reproducing the analyses
 
@@ -254,8 +255,8 @@ Package dependencies are loaded within the documents. A future version of the re
 - The directory structure should be preserved.
 - The knitted HTML reports provide the most accessible record of the completed analyses.
 - The `.Rmd` files provide the complete reproducible source documents.
-- The preparation scripts create the analysis-ready objects required by the main and supplementary `.R` scripts.
-- The main and supplementary `.R` scripts source their corresponding preparation scripts automatically.
+- The preparation scripts create the analysis-ready objects required by the supplementary `.R` scripts.
+- The supplementary `.R` scripts source their corresponding preparation scripts automatically.
 - The participant-level data must be obtained separately from the corresponding author.
 - This is the first public release of the analysis code. Development and earlier versions were maintained privately before creation of this repository.
 

@@ -287,20 +287,6 @@ This citation should be updated when a preprint or published article becomes ava
 The repository can be cited independently of the associated paper:
 
 ```bibtex
-@software{matar2026abperfectionism,
-  author  = {Matar, M.},
-  title   = {ab-perfectionism-analysis:
-             Analysis of Attention Biases in Perfectionism},
-  year    = {2026},
-  version = {1.0.0},
-  url     = {https://github.com/mrhmatar/ab-perfectionism-analysis},
-  note    = {Analysis code, knitted reports, and supporting materials}
-}
-```
-
-For a version-specific and permanently archived citation, cite the corresponding GitHub release or Zenodo record once a DOI is available:
-
-```bibtex
 @software{matar2026abperfectionism_zenodo,
   author    = {Matar, M.},
   title     = {ab-perfectionism-analysis:

@@ -68,12 +68,9 @@ ab-perfectionism-analysis/
 ├── LICENSE
 ├── AB_Perfectionism_Analysis.Rproj
 ├── AB_Perfectionism_Analysis_1.Rmd
-├── AB_Perfectionism_Analysis_2.Rmd
 ├── AB_Perfectionism_Study1_Preparation.R
-├── AB_Perfectionism_Study1_Analysis.R
 ├── AB_Perfectionism_Study1_Sup_Ctrl.R
 ├── AB_Perfectionism_Study2_Preparation.R
-├── AB_Perfectionism_Study2_Analysis.R
 ├── AB_Perfectionism_Study2_Sup_t1.R
 ├── reports/
 │   ├── AB_Perfectionism_Analysis_1.html
@@ -129,16 +126,6 @@ Imports and prepares the Study 1 questionnaire, eye-tracking, and response-time 
 Imports and prepares the Study 2 questionnaire, experimental, eye-tracking, and response-time data. It applies the analytical exclusions, retains participants with the required task data, constructs paired pre- and post-manipulation outcomes, derives task-accuracy and rule-awareness variables, centers the required predictors, and prepares condition and semantic-category variables.
 
 The preparation scripts contain no descriptive tables or exploratory plots. They are sourced automatically by the corresponding analysis scripts and do not need to be run separately.
-
-### Main analysis scripts
-
-#### `AB_Perfectionism_Study1_Analysis.R`
-
-Runs the Study 1 primary attentional models and produces model comparisons, diagnostics, estimated category-specific trends, planned theoretical comparisons, and interaction figures.
-
-#### `AB_Perfectionism_Study2_Analysis.R`
-
-Runs the Study 2 attention-bias modification checks and primary analyses of emotional responses to the failure task.
 
 ### Supplementary analysis scripts
 
@@ -205,17 +192,7 @@ AB_Perfectionism_Analysis_1.Rmd
 AB_Perfectionism_Analysis_2.Rmd
 ```
 
-Alternatively, run the corresponding preparation and analysis scripts:
-
-```text
-AB_Perfectionism_Study1_Preparation.R
-AB_Perfectionism_Study1_Analysis.R
-
-AB_Perfectionism_Study2_Preparation.R
-AB_Perfectionism_Study2_Analysis.R
-```
-
-The main and supplementary analysis scripts source their corresponding preparation scripts automatically.
+The supplementary analysis scripts source their corresponding preparation scripts automatically.
 
 ## Knitting the analysis reports
 
@@ -284,9 +261,9 @@ Package dependencies are loaded within the documents. A future version of the re
 
 ## Data availability
 
-The participant-level data are not publicly available. Deidentified data may be obtained from the corresponding author upon reasonable request, subject to applicable ethical, institutional, consent, and data-protection requirements.
-
 The public repository contains the analysis code, knitted reports, and documentation needed to describe the analytical workflow, but it does not contain participant-level data.
+
+Deidentified data may be obtained from the corresponding author upon reasonable request, subject to applicable ethical, institutional, consent, and data-protection requirements.
 
 ## Citing the associated paper
 

@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using the metadata below."
+title: "ab-perfectionism-analysis: Analysis of Attention Biases in Perfectionism"
+type: software
+version: 1.0.0
+date-released: 2026-09-13
+authors:
+  - family-names: Matar
+    given-names: Mariah
+repository-code: "https://github.com/mrhmatar/ab-perfectionism-analysis"
+license: MIT
+preferred-citation:
+  type: article
+  title: "Attention Bias and Emotional Reactivity in Perfectionism: Eye-Tracking and Experimental Evidence for Context-Dependent Effects"
+  year: 2026
+  status: manuscript in preparation
+  authors:
+    - family-names: Matar
+      given-names: Mariah
+    - family-names: Delor
+      given-names: Bérénice
+    - family-names: Douilliez
+      given-names: Céline
+    - family-names: Philippot
+      given-names: Pierre
+
+  abstract: >-
+     Analysis code and supporting materials for two studies of attention
+     bias in perfectionism. Mariah Matar and Bérénice Delor contributed
+     equally to the associated manuscript and share first authorship.

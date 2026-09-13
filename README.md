@@ -21,7 +21,29 @@ Attention biases have been proposed as a mechanism linking perfectionism to psyc
 
 ### Study 1
 
-Study 1 examined associations between perfectionism and attentional allocation in a community sample of 202 participants. Eye movements were recorded during a free-viewing change-detection task.
+Study 1 examined associations between perfectionism and attentional allocation 
+in a community sample (n = 202). 
+
+Participants completed a free-viewing change-detection task while their eye movements 
+were recorded. Each trial displayed five words simultaneously: one neutral, one 
+positive, one negative, one success-related, and one failure-related word. 
+Across successive displays, one word changed while the remaining words stayed constant. 
+Participants pressed the spacebar when they detected the change and then selected 
+the changed word.
+
+Word locations were rotated across trials so that semantic category was not 
+confounded with a fixed screen position. Changes followed a category-based rule 
+within each block, and participants were encouraged to identify that rule. 
+The analyses distinguished the category of the area of interest being viewed from 
+the category targeted by the change rule.
+
+Eye-tracking outcomes captured complementary stages of attentional allocation:
+
+- initial orienting, assessed through the probability of first or second fixation and proportional latency to first fixation;
+- early, intermediate, and late dwell-time proportions; and
+- dwell-time proportion across the complete trial.
+
+Response time indexed the speed with which participants detected a change.
 
 The analyses examined:
 
@@ -33,9 +55,24 @@ The analyses examined:
 
 ### Study 2
 
-Study 2 included 92 participants selected from the Study 1 participant pool. Participants completed a gaze-contingent attention-bias modification procedure that trained attention toward success-related, failure-related, or neutral stimuli.
+Study 2 participants (n = 92) were selected from the Study 1 participant pool and assigned 
+to success-oriented, failure-oriented, or control attention-bias modification conditions. 
+The procedure comprised:
 
-The analyses tested whether the manipulation altered attentional allocation and whether attention-bias modification condition influenced the association between perfectionism and emotional responses to a subsequent failure experience.
+1. a pre-manipulation assessment of attention;
+2. the gaze-contingent attention-bias modification task;
+3. a post-manipulation assessment of attention;
+4. a subsequent performance task designed to induce a failure experience; and
+5. repeated assessments of positive and negative mood.
+
+During attention-bias modification, stimulus presentation depended on participants’ gaze. 
+The active conditions trained attention toward success-related or failure-related information, 
+whereas the control condition did not impose the corresponding directional contingency.
+
+The manipulation checks tested whether post-manipulation attentional allocation 
+differed across conditions after accounting for pre-manipulation values. 
+The primary experimental analyses tested whether condition altered associations 
+between perfectionism and emotional responses following the failure experience.
 
 ## Analysis strategy
 

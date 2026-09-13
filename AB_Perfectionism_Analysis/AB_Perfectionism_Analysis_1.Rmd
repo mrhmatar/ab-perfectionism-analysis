@@ -1,0 +1,2262 @@
+---
+title: "Appendix A"
+subtitle: "Study 1 - Attention Bias Measurement"
+author: "MM"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    self_contained: true
+runtime: markdown
+editor_options:
+  markdown:
+    wrap: 72
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	eval = TRUE,
+	message = FALSE,
+	warning = FALSE,
+  digits = 3
+)
+# Load libraries
+library(rmarkdown)
+library(shiny)
+
+library(readxl) # For reading excel files
+library(dplyr) # For reshaping and summarizing data
+
+library(ggplot2) # For plots
+library(gridExtra) # For arranging ggplots in a grid
+library(grid) # For grob functions
+library(sjPlot) # For plotting interactions
+library(ggeffects) # For model-based predictions
+library(emmeans) # For planned comparisons
+
+library(psych) # For Cronbach's alpha and McDonald's omega
+library(pastecs) # For testing normality assumptions
+
+library(glmmTMB) # For beta and gamma generalized linear mixed models
+library(lmtest) # For likelihood ratio tests
+
+```
+
+# Data Preparation
+
+This section documents the main preprocessing steps used to derive the variables analyzed in Study 1. It complements the manuscript by providing implementation details for (a) outlier handling, (b) construction of perfectionism dimensions, and (c) derivation of attentional indices.
+
+## Questionnaire Data
+
+Questionnaire data from Study 1 and the baseline session of Study 2 were merged to create a single dataset for the dimensional analyses. Perfectionism was assessed using the Hewitt and Flett Multidimensional Perfectionism Scale (HMPS) and the Frost Multidimensional Perfectionism Scale (FMPS). Depression and anxiety were assessed using the CES-D and the GAD-7.
+
+Item scoring, reverse coding, and computation of questionnaire totals followed the standard scoring procedures for each instrument.
+
+```{r read_data_questionnaires_study1, include = FALSE}
+# Read data sample 1
+qu1.1 <- read_excel("AB_Perfectionism_Data/questionnaires_study1.1.xlsx")
+qu1.2 <- read_excel("AB_Perfectionism_Data/questionnaires_study1.2.xlsx")
+
+qu1.1$ID <- as.factor(qu1.1$ID)
+qu1.2$ID <- as.factor(qu1.2$ID)
+qu1 <- qu1.1 %>% inner_join(qu1.2, by = "ID")
+qu1 <- qu1 %>% rename(subject_id = ID_EyeTracker)
+
+# Read data sample 2
+qu2.1 <- read_excel("AB_Perfectionism_Data/questionnaires_study2.1.xlsx")
+qu2.2 <- read_excel("AB_Perfectionism_Data/questionnaires_study2.2.xlsx")
+qu2.3_1 <- read_excel("AB_Perfectionism_Data/questionnaires_study2.3_1.xlsx")
+qu2.3_2 <- read_excel("AB_Perfectionism_Data/questionnaires_study2.3_2.xlsx")
+qu2.3_3 <- read_excel("AB_Perfectionism_Data/questionnaires_study2.3_3.xlsx")
+
+qu2a <- qu2.1 %>% inner_join(qu2.2, by = "ID")
+qu2b <- qu2.3_1 %>% inner_join(qu2.3_2, by = "ID") %>% inner_join(qu2.3_3, by = "ID")
+qu2 <- qu2a %>% inner_join(qu2b, by = "ID")
+
+qu2 <- qu2 %>% rename(subject_id = ID_EyeTracker_1)
+qu2$subject_id <- as.numeric(qu2$subject_id)
+qu2$Age <- as.numeric(qu2$Age)
+qu2$GAD7_1 <- as.numeric(qu2$GAD7_1)
+qu2$GAD7_2 <- as.numeric(qu2$GAD7_2)
+qu2$GAD7_3 <- as.numeric(qu2$GAD7_3)
+qu2$GAD7_4 <- as.numeric(qu2$GAD7_4)
+qu2$GAD7_5 <- as.numeric(qu2$GAD7_5)
+qu2$GAD7_6 <- as.numeric(qu2$GAD7_6)
+qu2$GAD7_7 <- as.numeric(qu2$GAD7_7)
+
+# Merge questionnaire samples
+qu <- qu1 %>% full_join(qu2)
+```
+  
+```{r qu_scores_study1}
+# HMPS reverse coding
+qu[, c("HMPS_2", "HMPS_3", "HMPS_4", "HMPS_8", "HMPS_9", "HMPS_10", "HMPS_12",
+       "HMPS_19", "HMPS_21", "HMPS_24", "HMPS_30", "HMPS_34", "HMPS_36", "HMPS_37",
+       "HMPS_38", "HMPS_43", "HMPS_44", "HMPS_45")] <-
+  8 - qu[, c("HMPS_2", "HMPS_3", "HMPS_4", "HMPS_8", "HMPS_9", "HMPS_10", "HMPS_12",
+             "HMPS_19", "HMPS_21", "HMPS_24", "HMPS_30", "HMPS_34", "HMPS_36", "HMPS_37",
+             "HMPS_38", "HMPS_43", "HMPS_44", "HMPS_45")]
+
+# HMPS subscales
+SOP <- qu[, c("HMPS_1", "HMPS_6", "HMPS_8", "HMPS_12", "HMPS_14", "HMPS_15", "HMPS_17",
+              "HMPS_20", "HMPS_23", "HMPS_28", "HMPS_32", "HMPS_34", "HMPS_36", "HMPS_40", "HMPS_42")]
+OOP <- qu[, c("HMPS_2", "HMPS_3", "HMPS_4", "HMPS_7", "HMPS_10", "HMPS_16", "HMPS_19",
+              "HMPS_22", "HMPS_24", "HMPS_26", "HMPS_27", "HMPS_29", "HMPS_38", "HMPS_43", "HMPS_45")]
+SPP <- qu[, c("HMPS_5", "HMPS_9", "HMPS_11", "HMPS_13", "HMPS_18", "HMPS_21", "HMPS_25",
+              "HMPS_30", "HMPS_31", "HMPS_33", "HMPS_35", "HMPS_37", "HMPS_39", "HMPS_41", "HMPS_44")]
+
+qu$SOP <- rowSums(SOP)
+qu$OOP <- rowSums(OOP)
+qu$SPP <- rowSums(SPP)
+
+# FMPS subscales
+PS <- qu[, c("FMPS_4", "FMPS_6", "FMPS_12", "FMPS_16", "FMPS_19", "FMPS_24", "FMPS_30")]
+PE <- qu[, c("FMPS_1", "FMPS_11", "FMPS_15", "FMPS_20", "FMPS_26")]
+PC <- qu[, c("FMPS_3", "FMPS_5", "FMPS_22", "FMPS_35")]
+CM <- qu[, c("FMPS_9", "FMPS_10", "FMPS_13", "FMPS_14", "FMPS_18", "FMPS_21", "FMPS_23", "FMPS_25", "FMPS_34")]
+DA <- qu[, c("FMPS_17", "FMPS_28", "FMPS_32", "FMPS_33")]
+O  <- qu[, c("FMPS_2", "FMPS_7", "FMPS_8", "FMPS_27", "FMPS_29", "FMPS_31")]
+
+qu$PS <- rowSums(PS)
+qu$PE <- rowSums(PE)
+qu$PC <- rowSums(PC)
+qu$CM <- rowSums(CM)
+qu$DA <- rowSums(DA)
+qu$O  <- rowSums(O)
+
+# CES-D reverse coding and totals
+qu[, c("CESD_4", "CESD_8", "CESD_12", "CESD_16")] <-
+  3 - qu[, c("CESD_4", "CESD_8", "CESD_12", "CESD_16")]
+
+CESD <- qu[, c("CESD_1", "CESD_2", "CESD_3", "CESD_4", "CESD_5", "CESD_6", "CESD_7", "CESD_8",
+               "CESD_9", "CESD_10", "CESD_11", "CESD_12", "CESD_13", "CESD_14", "CESD_15",
+               "CESD_16", "CESD_17", "CESD_18", "CESD_19", "CESD_20")]
+qu$CESD <- rowSums(CESD)
+
+# GAD-7 totals
+GAD7 <- qu[, c("GAD7_1", "GAD7_2", "GAD7_3", "GAD7_4", "GAD7_5", "GAD7_6", "GAD7_7")]
+qu$GAD7 <- rowSums(GAD7)
+```
+
+### Outlier Handling
+
+Outliers were identified before computing descriptive statistics and correlations. In line with the procedure reported in the manuscript, univariate outliers were defined as observations with standardized scores below -3 or above +3, and multivariate outliers were assessed using Mahalanobis distance.
+
+```{r boxplots_study1, fig.height=6, fig.width=8}
+bxplt <- boxplot(qu[, c("SOP", "OOP","SPP", "PS", "PC", "PE", "CM", "DA", "O","GAD7", "CESD")])
+```
+
+```{r outliers_study1}
+# Standardize questionnaire variables
+qu[, c("ZSOP", "ZOOP", "ZSPP", "ZPS", "ZPC", "ZPE", "ZCM", "ZDA", "ZO", "ZGAD7", "ZCESD")] <-
+  scale(qu[, c("SOP", "OOP", "SPP", "PS", "PC", "PE", "CM", "DA", "O", "GAD7", "CESD")])
+
+# Identify univariate outliers
+univar_out <- c(
+  which(qu$ZSOP > 3 | qu$ZSOP < -3),
+  which(qu$ZOOP > 3 | qu$ZOOP < -3),
+  which(qu$ZSPP > 3 | qu$ZSPP < -3),
+  which(qu$ZPS > 3 | qu$ZPS < -3),
+  which(qu$ZPE > 3 | qu$ZPE < -3),
+  which(qu$ZPC > 3 | qu$ZPC < -3),
+  which(qu$ZCM > 3 | qu$ZCM < -3),
+  which(qu$ZDA > 3 | qu$ZDA < -3),
+  which(qu$ZO > 3 | qu$ZO < -3),
+  which(qu$ZGAD7 > 3 | qu$ZGAD7 < -3),
+  which(qu$ZCESD > 3 | qu$ZCESD < -3)
+)
+
+univar_out <- unique(univar_out)
+length(univar_out)
+
+# Remove univariate outliers
+qu <- qu[-univar_out, ]
+
+# Identify multivariate outliers
+vars <- qu[, c("SOP", "OOP", "SPP", "PS", "PC", "PE", "CM", "DA", "O", "GAD7", "CESD")]
+md <- mahalanobis(vars, center = colMeans(vars), cov = cov(vars))
+cutoff <- qchisq(p = 1 - .001, df = ncol(vars))
+multivar_out_MH <- which(md > cutoff)
+
+length(multivar_out_MH)
+```
+
+Univariate outliers were excluded from subsequent analyses. No multivariate outliers were identified.
+
+### Perfectionism Dimensions
+
+Following Steober and Otto (2006), Perfectionistic Strivings was computed as the sum of standardized Personal Standards (FMPS-PS) and Self-Oriented Perfectionism (HMPS-SOP) scores. Perfectionistic Concerns was computed as the sum of standardized Concerns over Mistakes (FMPS-CM), Doubts about Actions (FMPS-DA), and Socially Prescribed Perfectionism (HMPS-SPP) scores.
+        
+```{r strivings_concerns_study1}
+qu$Perf_Strivings <- rowSums(qu[, c("ZPS", "ZSOP")])
+qu$Perf_Concerns  <- rowSums(qu[, c("ZCM", "ZDA", "ZSPP")])
+```
+
+## Attention Bias Assessment
+
+### Response Time
+
+Response times were defined as the latency between onset of the changed display and the participant’s response. Trial presentation order was retained as `trial_nr`. The ordering of the RT rows was verified against `TRIAL_INDEX` in the raw eye-tracking records.
+
+```{r read_data_rt_study1, include=FALSE}
+# Read response-time data
+rt1 <- read_excel("AB_Perfectionism_Data/rt_study1.xlsx") %>%
+  rename(subject_id = subject_nr, block_id = block_loop)
+rt2 <- read_excel("AB_Perfectionism_Data/rt_study2.xlsx") %>%
+  rename(subject_id = subject_nr, block_id = block_loop)
+
+# Read the raw eye-tracking data before block-level aggregation. TRIAL_INDEX is
+# available in these files, rather than in the response-time files.
+et1 <- read_excel("AB_Perfectionism_Data/et_study1_500to5500.xlsx") %>%
+  rename(subject_id = RECORDING_SESSION_LABEL)
+et2 <- read_excel("AB_Perfectionism_Data/et_study2_500to5500.xlsx") %>%
+  rename(subject_id = RECORDING_SESSION_LABEL)
+
+# Number blocks by their order of presentation within each participant/session.
+# block_id uniquely identifies each block, including paired blocks with
+# the same change category.
+rt1 <- rt1 %>%
+  group_by(subject_id) %>%
+  mutate(
+    block_nr = match(block_id, unique(block_id)),
+    # RT rows are stored in presentation order; this ordering was verified
+    # against EyeLink TRIAL_INDEX for every unambiguously matched trial.
+    trial_nr = row_number()
+  ) %>%
+  ungroup()
+
+rt2 <- rt2 %>%
+  group_by(subject_id, Temps_de_mesure) %>%
+  mutate(
+    block_nr = match(block_id, unique(block_id)),
+    trial_nr = row_number()
+  ) %>%
+  ungroup()
+
+# Separate T1 and T2
+t1 <- which(rt2$Temps_de_mesure == "T1")
+rt2_1 <- rt2[t1, ]
+
+t1_et <- which(et2$MEASUREMENT_TIME == "T1")
+et2_1 <- et2[t1_et, ]
+
+# Merge Study 1 and baseline Study 2 data
+rt2_1 <- subset(rt2_1, select = -ID) %>% rename(ID = Code)
+rt <- rt1 %>% full_join(rt2_1)
+```
+
+Analyses were conducted on correct trials only, and trials with response times below 200 ms were excluded.
+
+```{r data_preparation_rt_study1}
+rt$correct_response <- as.factor(rt$correct_response) %>%
+  dplyr::recode("Vrai" = 1, "Faux" = 0)
+
+incorrect <- which(rt$correct_response == 0)
+rt200 <- which(rt$response_time < 200)
+
+length(incorrect)
+length(rt200)
+
+rt <- rt[-c(incorrect, rt200), ]
+```
+
+Rule awareness was assessed at the end of each block and coded as a binary variable (0 = no, 1 = yes). This variable was retained as a control in subsequent models.
+
+```{r guessed_block_rule_study1}
+rt <- rt %>% rename(guessed_block_rule = response_keyboard_response)
+rt$guessed_block_rule <- as.factor(rt$guessed_block_rule) %>%
+  dplyr::recode("o" = 1, "O" = 1, "n" = 0, "N" = 0)
+```
+
+### Eye Tracking
+
+Eye movements during the 5000 ms free-viewing phase were used to compute the attentional indices. Raw eye-tracking data from Study 1 and the baseline session of Study 2 were merged prior to processing.
+
+**Internal timing note.** The exported EyeLink variables are indexed according to the raw trial clock and labelled `IA_DWELL_TIME_500to1500`, `IA_DWELL_TIME_1500to3500`, and `IA_DWELL_TIME_3500to5500`. The word display began 500 ms after the start of that clock. Subtracting this 500-ms offset yields the stimulus-relative intervals reported in the analyses: 0–1000, 1000–3000, and 3000–5000 ms. This distinction should be retained in the analysis documentation so that the exported variable names are not mistaken for post-stimulus intervals.
+
+```{r read_data_eye_tracking_study1, include = FALSE}
+# The raw eye-tracking files and the Study 2 baseline subset were read above so
+# that TRIAL_INDEX could be transferred before any block-level aggregation.
+et <- et1 %>% full_join(et2_1)
+
+# Recode labels and variables used for index computation
+et$IA_LABEL <- as.factor(et$IA_LABEL)
+et$IA_LABEL <- et$IA_LABEL %>%
+  dplyr::recode("Neutre" = "Neutral",
+                "Pos" = "Positive",
+                "Neg" = "Negative",
+                "Pos_Perf" = "Success",
+                "Neg_Perf" = "Failure")
+
+et$IA_FIRST_FIXATION_VISITED_IA_COUNT <- as.factor(et$IA_FIRST_FIXATION_VISITED_IA_COUNT)
+et$IA_FIRST_FIXATION_VISITED_IA_COUNT <- et$IA_FIRST_FIXATION_VISITED_IA_COUNT %>%
+  dplyr::recode("0" = "1", "1" = "1", "2" = "0", "3" = "0", "4" = "0")
+et$IA_FIRST_FIXATION_VISITED_IA_COUNT <- as.numeric(as.character(et$IA_FIRST_FIXATION_VISITED_IA_COUNT))
+
+et$IA_FIRST_FIXATION_TIME <- as.numeric(et$IA_FIRST_FIXATION_TIME)
+```
+
+Values outside the observable time window were treated as missing prior to index construction.
+
+```{r check_oob_et_study1}
+out_first_fix_latency <- which(et$IA_FIRST_FIXATION_TIME > 5000)
+length(out_first_fix_latency)
+
+et$IA_FIRST_FIXATION_TIME[out_first_fix_latency] <- NA
+```
+
+```{r check_missing_et_study1, eval = FALSE}
+ #check missing values
+length(which(is.na(et$IA_FIRST_FIXATION_VISITED_IA_COUNT))) #3090
+length(which(is.na(et$IA_FIRST_FIXATION_TIME))) #3571
+length(which(is.na(et$IA_DWELL_TIME))) #0
+length(which(is.na(et$IA_DWELL_TIME_500to1500))) #0
+length(which(is.na(et$IA_DWELL_TIME_1500to3500))) #0
+length(which(is.na(et$IA_DWELL_TIME_3500to5500))) #0
+
+#identify participants missing > 25% of trials => NONE
+et$missing_IA_FIRST_FIXATION_VISITED_IA_COUNT <- NA
+et$missing_IA_FIRST_FIXATION_TIME <- NA
+for (participant in levels(as.factor(et$subject_id))){
+  et$missing_IA_FIRST_FIXATION_VISITED_IA_COUNT[et$subject_id == participant] <- (length(which(is.na(et$IA_FIRST_FIXATION_VISITED_IA_COUNT[et$subject_id == participant])))/375)*100
+  et$missing_IA_FIRST_FIXATION_TIME[et$subject_id == participant] <- (length(which(is.na(et$IA_FIRST_FIXATION_TIME[et$subject_id == participant])))/375)*100
+}
+describe(et[c("missing_IA_FIRST_FIXATION_VISITED_IA_COUNT", "missing_IA_FIRST_FIXATION_TIME")])
+#                                            vars     n mean   sd median trimmed  mad min   max range skew kurtosis   se
+# missing_IA_FIRST_FIXATION_VISITED_IA_COUNT    1 76111 4.03 4.19   2.67    3.39 3.56   0 21.87 21.87 1.56     3.03 0.02
+# missing_IA_FIRST_FIXATION_TIME                2 76111 4.66 6.70   2.93    3.49 3.95   0 58.67 58.67 4.47    28.15 0.02
+
+unique(et$subject_id[which(et$missing_IA_FIRST_FIXATION_TIME > 25)]) #16 17 18
+et$missing_IA_FIRST_FIXATION_TIME[et$subject_id == '16'][1] #47.47
+et$missing_IA_FIRST_FIXATION_TIME[et$subject_id == '17'][1] #58.67
+et$missing_IA_FIRST_FIXATION_TIME[et$subject_id == '18'][1] #32.27
+```
+
+#### Attentional Indices
+
+Attentional indices were derived to capture attentional engagement and maintenance and were expressed as proportions relative to competing stimuli. Following Skinner et al. (2018), these indices were aggregated at the block level, yielding one observation per semantic category per block (50 observations per participant).
+
+The following indices were computed:
+
+$$\textrm{Probability of first or second fixation}= \frac {\textrm{Number of times the first or the second fixation was to the target AOI}}{\textrm{ Total number of trials with a first fixation × 2}}$$
+
+$$\textrm{Latency to first fixation} = \frac{\textrm{Mean latency of first fixation to target AOI}}{\textrm{Mean latency of first fixation to target AOI} + \textrm{Mean latency of first fixation to other AOIs}}$$
+
+$$\textrm{Dwell time} = \frac{\textrm{Mean dwell time in target AOI}}{\textrm{Mean dwell time in target AOI} + \textrm{Mean dwell time in other AOIs}}$$
+The viewing period was divided into three temporal phases:
+
+- Early: 0–1000 ms
+
+- Intermediate: 1000–3000 ms
+
+- Late: 3000–5000 ms
+
+Dwell time was computed for the early, intermediate, and late phases, as well as across the whole trial.
+
+```{r calculate_et_indices_study1}
+# Merge ET with RT to recover block-level rule variables. Trial number comes
+# from the eye-tracking export and provides the within-participant trial key.
+rt_block_lookup <- rt %>%
+  select(subject_id, trial_nr, Change_category, block_id, block_nr,
+         guessed_block_rule) %>%
+  distinct()
+
+etrt <- et %>%
+  rename(trial_nr = TRIAL_INDEX) %>%
+  left_join(rt_block_lookup,
+            by = c("subject_id", "trial_nr", "Change_category"),
+            relationship = "many-to-one")
+
+et_a <- etrt[c("subject_id", "block_id", "block_nr", "IA_LABEL", "Change_category", "guessed_block_rule",
+               "IA_DWELL_TIME", "IA_DWELL_TIME_500to1500", "IA_DWELL_TIME_1500to3500", "IA_DWELL_TIME_3500to5500",
+               "IA_FIRST_FIXATION_VISITED_IA_COUNT", "IA_FIRST_FIXATION_TIME")] %>%
+  group_by(subject_id, block_id, block_nr, IA_LABEL, Change_category, guessed_block_rule) %>%
+  reframe(
+    IA_FIRST_FIXATION_PROBABILITY = mean(na.omit(IA_FIRST_FIXATION_VISITED_IA_COUNT)),
+    IA_FIRST_FIXATION_TIME_BLOCKMEAN = mean(na.omit(IA_FIRST_FIXATION_TIME)),
+    IA_DWELL_TIME_BLOCKMEAN = mean(IA_DWELL_TIME),
+    IA_DWELL_TIME_500to1500_BLOCKMEAN = mean(IA_DWELL_TIME_500to1500),
+    IA_DWELL_TIME_1500to3500_BLOCKMEAN = mean(IA_DWELL_TIME_1500to3500),
+    IA_DWELL_TIME_3500to5500_BLOCKMEAN = mean(IA_DWELL_TIME_3500to5500)
+  )
+
+et_b <- et_a %>%
+  group_by(subject_id, block_id, block_nr) %>%
+  summarise(
+    AVG_FIRST_FIXATION_TIME = sum(na.omit(IA_FIRST_FIXATION_TIME_BLOCKMEAN)),
+    AVG_DWELL_TIME = sum(na.omit(IA_DWELL_TIME_BLOCKMEAN)),
+    AVG_DWELL_TIME_500to1500 = sum(IA_DWELL_TIME_500to1500_BLOCKMEAN),
+    AVG_DWELL_TIME_1500to3500 = sum(IA_DWELL_TIME_1500to3500_BLOCKMEAN),
+    AVG_DWELL_TIME_3500to5500 = sum(IA_DWELL_TIME_3500to5500_BLOCKMEAN)
+  )
+
+et <- et_a %>% inner_join(et_b, relationship = "many-to-many")
+
+et$first_fix_prob <- et$IA_FIRST_FIXATION_PROBABILITY
+et$first_fix_latency <- et$IA_FIRST_FIXATION_TIME_BLOCKMEAN / et$AVG_FIRST_FIXATION_TIME
+et$dwell_time <- et$IA_DWELL_TIME_BLOCKMEAN / et$AVG_DWELL_TIME
+et$dwell_time_early <- et$IA_DWELL_TIME_500to1500_BLOCKMEAN / et$AVG_DWELL_TIME_500to1500
+et$dwell_time_intermediate <- et$IA_DWELL_TIME_1500to3500_BLOCKMEAN / et$AVG_DWELL_TIME_1500to3500
+et$dwell_time_late <- et$IA_DWELL_TIME_3500to5500_BLOCKMEAN / et$AVG_DWELL_TIME_3500to5500
+
+# Remove remaining missing values
+missing_ffp <- which(is.na(et$first_fix_prob))
+missing_ffl <- which(is.na(et$first_fix_latency))
+et <- et[-unique(c(missing_ffp, missing_ffl)), ]
+```
+
+## Descriptive Statistics
+
+All questionnaire descriptives, reliability estimates, correlations, and participant-level symptom analyses were restricted to participants with usable attention-measurement data. The task dataset contains repeated observations, so
+the questionnaire dataset was filtered by participant identifier and retained one row per participant.
+
+**Sample Demographics**
+
+```{r task_completer_questionnaire_sample_study1}
+task_completer_ids <- et %>%
+  filter(!is.na(subject_id)) %>%
+  distinct(subject_id)
+
+qu_task <- qu %>%
+  semi_join(task_completer_ids, by = "subject_id") %>%
+  distinct(subject_id, .keep_all = TRUE)
+
+stopifnot(nrow(qu_task) == n_distinct(qu_task$subject_id))
+message("Study 1 task-completer questionnaire sample: N = ", nrow(qu_task))
+```
+
+```{r sample_demographics_study1}
+round(psych::describe(qu_task$Age), 2)
+table(qu_task$Sexe, useNA = "ifany")
+table(qu_task$Genre, useNA = "ifany")
+table(qu_task$Actual_Studies, useNA = "ifany")
+table(qu_task$Mother_Tongue, useNA = "ifany")
+```
+
+
+**Questionnaires** 
+
+```{r descriptives_questionnaires_study1}
+alphaSOP <- psych::alpha(qu_task[, c("HMPS_1", "HMPS_6", "HMPS_8", "HMPS_12", "HMPS_14", "HMPS_15", "HMPS_17",
+                                    "HMPS_20", "HMPS_23", "HMPS_28", "HMPS_32", "HMPS_34", "HMPS_36", "HMPS_40", "HMPS_42")])
+alphaOOP <- psych::alpha(qu_task[, c("HMPS_2", "HMPS_3", "HMPS_4", "HMPS_7", "HMPS_10", "HMPS_16", "HMPS_19",
+                                    "HMPS_22", "HMPS_24", "HMPS_26", "HMPS_27", "HMPS_29", "HMPS_38", "HMPS_43", "HMPS_45")])
+alphaSPP <- psych::alpha(qu_task[, c("HMPS_5", "HMPS_9", "HMPS_11", "HMPS_13", "HMPS_18", "HMPS_21", "HMPS_25",
+                                    "HMPS_30", "HMPS_31", "HMPS_33", "HMPS_35", "HMPS_37", "HMPS_39", "HMPS_41", "HMPS_44")])
+alphaPS <- psych::alpha(qu_task[, c("FMPS_4", "FMPS_6", "FMPS_12", "FMPS_16", "FMPS_19", "FMPS_24", "FMPS_30")])
+alphaPE <- psych::alpha(qu_task[, c("FMPS_1", "FMPS_11", "FMPS_15", "FMPS_20", "FMPS_26")])
+alphaPC <- psych::alpha(qu_task[, c("FMPS_3", "FMPS_5", "FMPS_22", "FMPS_35")])
+alphaCM <- psych::alpha(qu_task[, c("FMPS_9", "FMPS_10", "FMPS_13", "FMPS_14", "FMPS_18", "FMPS_21", "FMPS_23", "FMPS_25", "FMPS_34")])
+alphaDA <- psych::alpha(qu_task[, c("FMPS_17", "FMPS_28", "FMPS_32", "FMPS_33")])
+alphaO <- psych::alpha(qu_task[, c("FMPS_2", "FMPS_7", "FMPS_8", "FMPS_27", "FMPS_29", "FMPS_31")])
+alphaPerf_Strivings <- psych::alpha(qu_task[, c("ZPS", "ZSOP")])
+alphaPerf_Concerns <- psych::alpha(qu_task[, c("ZCM", "ZDA", "ZSPP")])
+alphaGAD7 <- psych::alpha(qu_task[, paste0("GAD7_", 1:7)])
+alphaCESD <- psych::alpha(qu_task[, paste0("CESD_", 1:20)])
+
+round(psych::describe(qu_task[c(
+  "SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
+  "Perf_Strivings", "Perf_Concerns", "GAD7", "CESD"
+)]), 2)
+
+corr_table <- corr.test(qu_task[c("SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
+                                  "Perf_Strivings", "Perf_Concerns", "GAD7", "CESD")])$stars
+print(corr_table)
+```
+
+
+**Response Time**
+
+
+```{r merge_rt_qu_study1, include=FALSE}
+rt_qu <- rt[c("subject_id", "Change_category", "response_time", "block_id", "block_nr", "trial_nr",
+                "guessed_block_rule")]  %>% 
+  inner_join(qu_task[c("subject_id", "SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O","Perf_Strivings", "Perf_Concerns", "CESD", "GAD7",
+                   "Sexe", "Age", "Statut","Actual_Studies","University_HE",
+                   "Actual_Program","DomaineTravail", "Mother_Tongue")], 
+             relationship = "many-to-many")
+```
+
+```{r descriptives_rt_qu_study1}
+
+# response time
+round(describe(rt_qu$response_time),2)
+rt_qu[c("response_time", "Change_category")] %>% group_by(Change_category) %>% 
+  summarise(M = round(mean(response_time),2), SD = round(sd(response_time),2))
+```
+
+**Eye-tracking Indices**
+
+```{r merge_et_qu_study1, include = FALSE}
+et_qu <- et %>%
+  inner_join(
+    qu_task[c("subject_id", "SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O","Perf_Strivings", "Perf_Concerns", "CESD", "GAD7",
+         "Sexe", "Age", "Statut", "Actual_Studies", "University_HE",
+         "Actual_Program", "DomaineTravail", "Mother_Tongue")],
+    relationship = "many-to-many"
+  )
+```
+
+
+```{r descriptives_et_indices_study1}
+round(describe(et_qu[c("first_fix_prob", "first_fix_latency", "dwell_time",
+                       "dwell_time_early", "dwell_time_intermediate", "dwell_time_late")]), 2)
+
+et_qu[c("IA_LABEL", "first_fix_prob", "first_fix_latency", "dwell_time",
+        "dwell_time_early", "dwell_time_intermediate", "dwell_time_late")] %>%
+  group_by(IA_LABEL) %>%
+  summarise(
+    M_first_fix_prob = round(mean(first_fix_prob), 2),
+    SD_first_fix_prob = round(sd(first_fix_prob), 2),
+    M_first_fix_latency = round(mean(first_fix_latency), 2),
+    SD_first_fix_latency = round(sd(first_fix_latency), 2),
+    M_dwell_time = round(mean(dwell_time), 2),
+    SD_dwell_time = round(sd(dwell_time), 2),
+    M_dwell_time_early = round(mean(dwell_time_early), 2),
+    SD_dwell_time_early = round(sd(dwell_time_early), 2),
+    M_dwell_time_intermediate = round(mean(dwell_time_intermediate), 2),
+    SD_dwell_time_intermediate = round(sd(dwell_time_intermediate), 2),
+    M_dwell_time_late = round(mean(dwell_time_late), 2),
+    SD_dwell_time_late = round(sd(dwell_time_late), 2)
+  )
+
+```
+
+## Distributional Inspection
+
+To guide the choice of outcome distributions and link functions, the empirical distributions of the questionnaire, eye-tracking, and response-time variables were inspected visually using density plots. This inspection showed that the attentional outcomes differed markedly in scale and shape: eye-tracking indices were bounded proportions, whole-trial dwell time was more heavy-tailed than the phase-specific dwell time indices, and response times were strictly positive and right-skewed.
+
+```{r density_qu_study1, fig.width=8, fig.height=6}
+par(mfrow = c(2, 2))
+
+plot(density(as.numeric(na.omit(qu_task$Perf_Strivings))),
+     col = "blue",
+     main = "Perfectionistic Strivings",
+     xlab = "ZPS + ZSOP")
+
+plot(density(as.numeric(na.omit(qu_task$Perf_Concerns))),
+     col = "red",
+     main = "Perfectionistic Concerns",
+     xlab = "ZCM + ZDA + ZSPP")
+
+plot(density(as.numeric(na.omit(qu$CESD))),
+     col = "black",
+     main = "Depression",
+     xlab = "CES-D")
+
+plot(density(as.numeric(na.omit(qu$GAD7))),
+     col = "grey",
+     main = "Anxiety",
+     xlab = "GAD-7")
+```
+
+```{r density_etrt_study1, fig.width=8, fig.height=12}
+par(mfrow = c(4, 2))
+
+plot(density(as.numeric(na.omit(et$first_fix_prob))),
+     col = "gold",
+     main = "Probability of First or Second Fixation",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(et$first_fix_latency))),
+     col = "orange",
+     main = "Latency to First Fixation",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(et$dwell_time_early))),
+     col = "purple",
+     main = "Dwell Time (Early)",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(et$dwell_time_intermediate))),
+     col = "purple",
+     main = "Dwell Time (Intermediate)",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(et$dwell_time_late))),
+     col = "purple",
+     main = "Dwell Time (Late)",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(et$dwell_time))),
+     col = "purple",
+     main = "Dwell Time (Whole Trial)",
+     xlab = "")
+
+plot(density(as.numeric(na.omit(rt$response_time))),
+     col = "green",
+     main = "Response Time",
+     xlab = "Time to response (ms)")
+```
+
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\
+
+# Associations Between Perfectionism and Attention
+
+These analyses estimated associations between perfectionism and attentional outcomes, including the proportion of first or second fixation, proportional latency to first fixation, proportional dwell time, and response time.
+
+The outcomes were analyzed using **generalized linear mixed-effects models (GLMMs)** fitted with `glmmTMB` (Brooks et al., 2017). This framework accommodates the heterogeneous distributional properties of the attentional outcomes while representing dependence associated with participants and block positions. Proportional eye-tracking outcomes were fitted with beta mixed models and a logit link; positively skewed response times were fitted with gamma mixed models and a log link. Rule awareness was included in the dispersion submodel because variability in performance could differ after participants inferred the block rule.
+
+The multilevel structure distinguished variation
+
+- **between participants**, represented by a participant random intercept,
+
+- **between participants in the target-AOI effect**, represented where supported by an uncorrelated participant-specific random slope for `Change_category01`,
+
+- **across presentation order**, represented by a fixed time effect estimating the average linear trend, and
+
+- **within participant-by-block observations**, represented by the conditional residual variation.
+
+For eye-tracking outcomes, centered numeric block presentation order was included as a fixed effect estimating the average linear time trend. `Change_category01` indicated whether an AOI belonged to the semantic category targeted by the current block rule and was included as both a fixed effect and an uncorrelated participant-specific random slope. Response-time models retained numeric trial presentation order as a fixed covariate and a participant random intercept.
+
+Note. A block-identity random intercept was considered but omitted because it caused estimation problems for several outcomes and explained negligible variance where estimable
+
+### i) Model Inputs and Predictor Coding
+
+#### Semantic Coding
+
+Semantic category was represented as a five-level factor comprising neutral, positive, negative, success-related, and failure-related stimuli, with Neutral specified as the reference category. For response-time models, semantic category referred to the changed word; for eye-tracking models, it referred to the AOI category.
+
+Because Neutral was the reference category, the interaction coefficients in the factor-coded GLMM tested whether the perfectionism slope for each other semantic category differed from the slope for Neutral; they did not test whether a category-specific slope differed from zero. Following a supported omnibus interaction, `emtrends()` was therefore used to estimate and test the perfectionism slope separately within each of the five semantic categories.
+
+Because the attentional outcomes were proportions, these slopes indicated whether the share of attention allocated to a category changed as a function of perfectionism. Such a change necessarily reflected redistribution across the categories in the display, although a category-specific slope did not identify
+the categories against which that redistribution occurred. 
+
+Four planned comparisons among the slopes directly tested whether associations with perfectionism differed according to emotional valence, success versus failure, performance relevance, and non-neutral versus neutral content. More specifically, `emtrends()` first recovered the estimated perfectionism slope, denoted below by $s$, within each semantic category. `contrast()` then formed the following weighted combinations of those slopes:
+
+- emotional valence: $(s_{Negative}+s_{Failure})-(s_{Positive}+s_{Success})$;
+- success versus failure: $s_{Failure}-s_{Success}$;
+- performance relevance: $3(s_{Success}+s_{Failure})-
+  2(s_{Neutral}+s_{Positive}+s_{Negative})$; and
+- non-neutral versus neutral content: $(s_{Positive}+s_{Negative}+
+  s_{Success}+s_{Failure})-4s_{Neutral}$.
+
+The integer weights below are scaled versions of differences between the corresponding category averages. For example, the performance-relevance contrast is six times the difference between the mean slope for the two performance-relevant categories and the mean slope for the three performance-irrelevant categories. Multiplying every weight in a contrast by the same positive constant changes the scale of its estimate and standard
+error, but not its test statistic or *p* value. 
+
+Thus, the planned tests assess whether the perfectionism slopes differ across the theoretically defined sets of categories; the separate `emtrends()` tests assess whether the slope within
+each individual category differs from zero.
+
+```{r semantic_class_rt_study1}
+semantic_levels <- c("Neutral", "Positive", "Negative", "Success", "Failure")
+
+rt_qu$Change_category_f <- factor(
+  rt_qu$Change_category,
+  levels = semantic_levels
+)
+stopifnot(levels(rt_qu$Change_category_f)[1] == "Neutral")
+
+# Planned comparisons among factor levels for emmeans follow-ups. Each vector
+# is explicitly named to show the category mapping and uses the agreed integer
+# coding. Positive estimates follow the direction described in each comment.
+semantic_planned <- list(
+  # Negative minus positive, irrespective of performance relevance
+  positive_vs_negative = c(
+    Neutral = 0, Positive = -1, Negative = 1, Success = -1, Failure = 1
+  ),
+  # Failure minus success
+  Success_Failure = c(
+    Neutral = 0, Positive = 0, Negative = 0, Success = -1, Failure = 1
+  ),
+  # Performance-relevant minus performance-irrelevant
+  performance_irrelevant_vs_relevant = c(
+    Neutral = -2, Positive = -2, Negative = -2, Success = 3, Failure = 3
+  ),
+  # All non-neutral categories minus Neutral
+  NonNeutral_vs_Neutral = c(
+    Neutral = -4, Positive = 1, Negative = 1, Success = 1, Failure = 1
+  )
+)
+
+stopifnot(
+  all(vapply(semantic_planned, sum, numeric(1)) == 0),
+  all(vapply(semantic_planned, function(x) identical(names(x), semantic_levels),
+             logical(1)))
+)
+
+# Colorblind-accessible Okabe-Ito palette.
+semantic_colors <- c(
+  Neutral = "#000000", Positive = "#56B4E9", Negative = "#D55E00",
+  Success = "#009E73", Failure = "#CC79A7"
+)
+contrast_colors <- c(
+  positive_vs_negative = "#0072B2", Success_Failure = "#D55E00",
+  performance_irrelevant_vs_relevant = "#009E73",
+  NonNeutral_vs_Neutral = "#CC79A7"
+)
+contrast_labels <- c(
+  positive_vs_negative = "Positive vs. negative",
+  Success_Failure = "Success vs. failure",
+  performance_irrelevant_vs_relevant = "Performance-irrelevant\nvs. relevant",
+  NonNeutral_vs_Neutral = "Non-neutral vs. neutral"
+)
+
+# Enlarged source typography remains legible after two plots are combined.
+figure3_theme <- theme_minimal(base_size = 17) +
+  theme(
+    plot.title = element_text(size = 19, face = "bold"),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 15),
+    legend.text = element_text(size = 14),
+    legend.key.height = unit(18, "pt")
+  )
+```
+
+```{r semantic_class_et_study1}
+et_qu$IA_LABEL_f <- factor(
+  et_qu$IA_LABEL,
+  levels = semantic_levels
+)
+stopifnot(levels(et_qu$IA_LABEL_f)[1] == "Neutral")
+```
+
+#### Centering Predictors
+
+Prior to analyses, Perfectionistic Strivings and Perfectionistic Concerns were mean-centered to make lower-order terms interpretable at the sample means.
+
+```{r center_predictors_study1}
+qu_task$Perf_Strivings_c <- qu_task$Perf_Strivings - mean(qu_task$Perf_Strivings, na.rm = TRUE)
+qu_task$Perf_Concerns_c <- qu_task$Perf_Concerns - mean(qu_task$Perf_Concerns, na.rm = TRUE)
+
+rt_qu$Perf_Strivings_c <- rt_qu$Perf_Strivings - mean(qu_task$Perf_Strivings, na.rm = TRUE)
+rt_qu$Perf_Concerns_c <- rt_qu$Perf_Concerns - mean(qu_task$Perf_Concerns, na.rm = TRUE)
+
+et_qu$Perf_Strivings_c <- et_qu$Perf_Strivings - mean(qu_task$Perf_Strivings, na.rm = TRUE)
+et_qu$Perf_Concerns_c <- et_qu$Perf_Concerns - mean(qu_task$Perf_Concerns, na.rm = TRUE)
+```
+
+#### Participant and Block Structure
+
+Repeated observations were modeled using participant-specific random effects. For eye-tracking outcomes, the model included a participant random intercept and an uncorrelated participant-specific random slope for `Change_category01`. 
+
+Centered block order was retained as a fixed effect to estimate the average linear time trend across participants. For trial-level response times, numeric trial presentation order was retained as a fixed covariate and participant was included as a random intercept. `Change_category01` additionally controlled whether an eye-tracking AOI matched the category targeted within that block.
+
+```{r participant_and_block_study1}
+rt_qu$subject_id <- as.factor(rt_qu$subject_id)
+rt_qu$block_id <- as.factor(rt_qu$block_id)
+rt_qu$block_nr <- as.integer(rt_qu$block_nr)
+rt_qu$trial_nr <- as.integer(rt_qu$trial_nr)
+rt_qu$trial_nr_c <- rt_qu$trial_nr - mean(rt_qu$trial_nr, na.rm = TRUE)
+
+et_qu$subject_id <- as.factor(et_qu$subject_id)
+et_qu$block_id <- as.factor(et_qu$block_id)
+et_qu$block_nr <- as.integer(et_qu$block_nr)
+et_qu$block_nr_c <- et_qu$block_nr - mean(et_qu$block_nr, na.rm = TRUE)
+```
+
+For eye-tracking analyses, a binary indicator (Change_category01) was created to denote whether a given AOI matched the semantic category targeted by the change rule within a block (0 = non-target, 1 = target).
+
+```{r et_change_category_study1}
+et_qu$Change_category <- as.factor(et_qu$Change_category)
+et_qu$Change_category01 <- 0
+et_qu$Change_category01 <- as.integer(
+  as.character(et_qu$IA_LABEL) == as.character(et_qu$Change_category)
+)
+```
+
+#### Hierarchical Model-Building Strategy
+
+For each attentional outcome, models were estimated hierarchically.
+
+- The **null model** for eye-tracking outcomes included mean-centered block presentation order, the fixed target-AOI indicator, the outcome-specific participant random-effects structure, and rule awareness in the dispersion submodel. The response-time null model included mean-centered trial presentation order, a participant random intercept, and rule awareness in the dispersion submodel.
+
+- The **partial model** added semantic category as a five-level factor comprising neutral, positive, negative, success-related, and failure-related stimuli.
+
+- The **full models** separately added either mean-centered Perfectionistic Strivings or mean-centered Perfectionistic Concerns and their interaction with the five-level semantic-category factor.
+
+Likelihood-ratio tests and AIC were used to determine whether adding semantic category improved fit relative to the null model and whether adding a perfectionism-by-semantic-category interaction improved fit relative to the partial model. Category-specific trends and planned theoretical comparisons were interpreted only when the corresponding full model improved fit.
+
+#### Model Diagnostic Functions
+
+Model fit was evaluated using Pearson residual-versus-fitted plots and simulation-based predictive checks comparing observed and model-implied outcome distributions. Convergence warnings and near-zero variance components were also be inspected for every fitted model.
+
+```{r model_diagnostics_functions, echo=FALSE}
+# Pearson residuals versus response-scale fitted values
+diag_resid_fitted <- function(model) {
+  ggplot(
+    data.frame(
+      fitted = predict(model, type = "response"),
+      residuals = residuals(model, type = "pearson")
+    ),
+    aes(x = fitted, y = residuals)
+  ) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+    ggtitle(paste("Residuals vs. Fitted Values:", deparse(substitute(model)))) +
+    theme_minimal()
+}
+
+# Simulation-based predictive check for glmmTMB models
+diag_ppc <- function(model) {
+  set.seed(123)
+  predicted_values <- simulate(model, nsim = 1)[[1]]
+  observed_values <- model.response(model.frame(model))
+  
+  ggplot() +
+    geom_density(aes(x = observed_values, color = "Observed"), linetype = "dashed", linewidth = 1) +
+    geom_density(aes(x = predicted_values, color = "Predicted"), linewidth = 1) +
+    labs(
+      title = paste("Observed vs. Predicted Values:", deparse(substitute(model))),
+      x = "Value",
+      y = "Probability Density"
+    ) +
+    scale_color_manual(values = c("Observed" = "blue", "Predicted" = "red")) +
+    theme_minimal()
+}
+
+diag_ppc_beta <- diag_ppc
+diag_ppc_gamma <- diag_ppc
+```
+
+## ii) Beta Regression for Eye-Tracking Indices
+
+Probability of first or second fixation, latency to first fixation, and dwell time reflect the relative allocation of attention to a target AOI and were therefore modeled as continuous proportions bounded between 0 and 1.
+
+These indices require a distribution that accommodates bounded, potentially asymmetric data. The **beta distribution** is well suited for this purpose (Douma & Weedon, 2019). In addition to modeling the expected value of the outcome (\(\mu\)), `glmmTMB` allows the beta precision parameter to vary as a function of predictors. Rule awareness was entered in this dispersion submodel to allow residual variability in attentional allocation to differ according to whether participants had inferred the block rule.
+
+### Model Overview
+
+- **Outcome:** Continuous proportions
+- **Distribution:** Beta
+- **Parameters:**
+  - \(\mu\): mean (expected proportion)
+  - \(\phi\): precision (larger values imply less conditional variance)
+
+### Link Functions
+
+A **logit** link was used for all proportional outcomes, yielding fixed-effect coefficients on the log-odds scale. Coefficients are reported on that scale. Substantive response-scale interpretation uses estimated marginal trends or predictions formed from the complete linear predictor and then transformed with the inverse-logit function; applying the inverse logit to a slope or interaction coefficient by itself does not yield a change in proportion (Douma & Weedon, 2019).
+
+### Model Specification for Eye-Tracking Indices
+
+All eye-tracking indices were modeled using **beta GLMMs** with a logit link for the conditional mean.
+
+#### Mean Submodel (\(\mu\))
+
+\[
+\begin{aligned}
+g(\mu_{ij}) ={}& \beta_0 + \sum_{k=1}^{4}\beta_k C_{k,ij} + \beta_5 Perf_j + \beta_6 BlockOrder_{ij} + \delta ChangeCategory_{ij} \\
+&+ \sum_{k=1}^{4}\gamma_k(C_{k,ij}\times Perf_j) \\
+&+ u_{0j} + u_{1j}ChangeCategory_{ij}.
+\end{aligned}
+\]
+
+where:
+
+- \(g(\cdot)\): logit link  
+- \(\mu_{ij}\): expected value of the attentional index for block \(i\) and participant \(j\)  
+- \(C_{k,ij}\): four indicator variables for positive, negative, success-related, and failure-related stimuli; neutral is the reference category  
+- \(Perf_j\): perfectionism (Perfectionistic Strivings or Perfectionistic Concerns, modeled in separate analyses; mean-centered)  
+- \(BlockOrder_{ij}\): mean-centered numeric presentation order of the block (1–10)  
+- \(u_{0j}\): participant-specific random intercept  
+- \(u_{1j}\): participant-specific deviation from the average target-AOI effect (where supported)  
+- \(ChangeCategory_{ij}\): whether the AOI matched the category targeted within its block  
+
+#### Dispersion Submodel (\(\phi\))
+
+\[
+\log(\phi_{ij}) = \delta_0 + \delta_1 BR_{ij}
+\]
+
+where:
+
+- \(\phi_{ij}\): beta precision parameter  
+- \(BR_{ij}\): rule awareness (0 = no, 1 = yes)  
+
+
+### Data Preparation for Beta Models
+
+To reduce memory usage and computation time, a subset containing only variables required for model fitting was created.
+
+```{r subset_et_data_study1}
+sub_et_qu <- et_qu[c("first_fix_prob", "first_fix_latency", "dwell_time",
+                     "dwell_time_early", "dwell_time_intermediate", "dwell_time_late",
+                     "subject_id", "block_id", "block_nr", "block_nr_c",
+                     "guessed_block_rule", "Change_category01", "IA_LABEL_f",
+                     "Perf_Strivings_c" , "Perf_Concerns_c")]
+```
+
+Because the beta distribution is defined on the open interval $(0, 1)$, observations equal to 0 or 1 were slightly adjusted prior to model fitting. These boundary values were treated as measurement-related rather than substantively distinct outcomes: given the simultaneous circular presentation of all stimulus categories, an observed proportion of zero generally indicated that no valid fixation was recorded for that category within the relevant measurement window, rather than the complete absence of attentional allocation. 
+
+```{r transform01_et_study1}
+transform01 <- function(x) {
+  n <- sum(!is.na(x))
+  ifelse(is.na(x), NA_real_, (x * (n - 1) + 0.5) / n)
+}
+
+sub_et_qu$first_fix_prob_t01 <- transform01(sub_et_qu$first_fix_prob)
+sub_et_qu$first_fix_latency_t01 <- transform01(sub_et_qu$first_fix_latency)
+sub_et_qu$dwell_time_early_t01 <- transform01(sub_et_qu$dwell_time_early)
+sub_et_qu$dwell_time_intermediate_t01 <- transform01(sub_et_qu$dwell_time_intermediate)
+sub_et_qu$dwell_time_late_t01 <- transform01(sub_et_qu$dwell_time_late)
+sub_et_qu$dwell_time_t01 <- transform01(sub_et_qu$dwell_time)
+```
+
+### 1. Probability of First or Second Fixation
+
+Probability of first or second fixation was modeled using a **beta GLMM** with a logit link for the mean parameter.
+
+##### bm0_first_fix_prob
+
+**Null model**
+
+```{r bm0_first_fix_prob_study1}
+bm0_first_fix_prob <- glmmTMB(
+  first_fix_prob_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  family = beta_family(link = "logit"),
+  dispformula = ~ guessed_block_rule,
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_first_fix_prob)
+```
+
+
+##### bm1_first_fix_prob
+
+**Partial Model**
+
+```{r bm1_first_fix_prob_study1}
+bm1_first_fix_prob <- glmmTMB(
+  first_fix_prob_t01 ~ 
+    IA_LABEL_f + 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm1_first_fix_prob)
+```
+
+
+**Comparison of model fit (bm1 vs. bm0)** 
+
+```{r bm1_first_fix_prob_fit_study1}
+lrtest(bm0_first_fix_prob, bm1_first_fix_prob)
+
+AIC(bm1_first_fix_prob, bm0_first_fix_prob)
+```
+
+##### bm2.1_first_fix_prob
+
+**Full model: Perfectionistic Strivings**
+
+```{r bm2.1_first_fix_prob_study1}
+bm2.1_first_fix_prob <- glmmTMB(
+  first_fix_prob_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id)  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_first_fix_prob)
+```
+
+
+**Comparison of model fit (bm1 vs. bm2.1)** 
+
+```{r bm2.1_first_fix_prob_fit_study1}
+lrtest(bm1_first_fix_prob, bm2.1_first_fix_prob)
+
+AIC(bm2.1_first_fix_prob, bm1_first_fix_prob)
+```
+
+
+**Model diagnostics (bm2.1)**
+
+```{r bm2.1_first_fix_prob_resid_study1, fig.height= 4, fig.width=10}
+p1 <- diag_resid_fitted(bm2.1_first_fix_prob)
+p2 <- diag_ppc_beta(bm2.1_first_fix_prob)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+##### bm2.2_first_fix_prob
+
+**Full model: Perfectionistic Concerns**
+
+```{r bm2.2_first_fix_prob_study1}
+bm2.2_first_fix_prob <- glmmTMB(
+  first_fix_prob_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_first_fix_prob)
+```
+
+
+**Comparison of model fit (bm2.2 vs. bm1)**
+
+```{r bm2.2_first_fix_prob_fit_study1}
+lrtest(bm1_first_fix_prob, bm2.2_first_fix_prob)
+
+AIC(bm2.2_first_fix_prob, bm1_first_fix_prob)
+```
+
+The Strivings model improved fit and was therefore followed up using estimated
+perfectionism slopes within each semantic category and the four planned
+comparisons among those slopes. The Concerns model did not significantly
+improve fit and was not followed up.
+
+```{r bm2.1_first_fix_prob_emmeans_study1}
+first_fix_prob_strivings_slopes <- emtrends(
+  bm2.1_first_fix_prob,
+  ~ IA_LABEL_f,
+  var = "Perf_Strivings_c"
+)
+summary(first_fix_prob_strivings_slopes, infer = c(TRUE, TRUE))
+first_fix_prob_planned_slopes <- contrast(
+  first_fix_prob_strivings_slopes,
+  method = semantic_planned,
+  adjust = "none"
+)
+first_fix_prob_planned_slopes
+```
+
+**Plotting the retained interaction**
+
+```{r bm2.1_first_fix_prob_plot_study1, fig.height=5, fig.width=7}
+preds_first_fix_prob_PS <- ggpredict(
+  bm2.1_first_fix_prob,
+  terms = c("Perf_Strivings_c [all]", "IA_LABEL_f")
+)
+
+p_first_fix_data <- as.data.frame(preds_first_fix_prob_PS) %>%
+  mutate(
+    group = factor(as.character(group), levels = semantic_levels),
+    supported = as.character(group) %in% c("Neutral", "Negative")
+  )
+stopifnot(
+  !anyNA(p_first_fix_data$group),
+  setequal(as.character(unique(p_first_fix_data$group)), semantic_levels)
+)
+
+p_first_fix_categories <- ggplot(
+  p_first_fix_data,
+  aes(x = x, y = predicted, group = group, color = group,
+      linewidth = supported, alpha = supported)
+) +
+  geom_line() +
+  scale_color_manual(values = semantic_colors, breaks = semantic_levels,
+                     labels = semantic_levels, drop = FALSE) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Strivings",
+    y = "Predicted proportion",
+    color = "Semantic category"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.y = element_blank()
+  )
+```
+
+```{r bm2.1_first_fix_prob_theoretical_contrasts_study1}
+# Values spanning the observed range of Strivings
+strivings_grid <- seq(
+  min(sub_et_qu$Perf_Strivings_c, na.rm = TRUE),
+  max(sub_et_qu$Perf_Strivings_c, na.rm = TRUE),
+  length.out = 100
+)
+
+# Estimated category means at each value of Strivings
+first_fix_emm <- emmeans(
+  bm2.1_first_fix_prob,
+  ~ IA_LABEL_f | Perf_Strivings_c,
+  at = list(Perf_Strivings_c = strivings_grid)
+)
+
+# Move predictions to the probability scale before calculating differences
+first_fix_emm_response <- regrid(
+  first_fix_emm,
+  transform = "response"
+)
+
+# Calculate the four theoretical contrasts
+first_fix_contrasts <- contrast(
+  first_fix_emm_response,
+  method = semantic_planned,
+  by = "Perf_Strivings_c",
+  adjust = "none"
+)
+
+first_fix_contrasts_df <- as.data.frame(first_fix_contrasts) %>%
+  mutate(contrast = factor(as.character(contrast), levels = names(contrast_colors)))
+stopifnot(
+  !anyNA(first_fix_contrasts_df$contrast),
+  setequal(as.character(unique(first_fix_contrasts_df$contrast)), names(contrast_colors))
+)
+first_fix_supported_contrasts <- as.data.frame(first_fix_prob_planned_slopes) %>%
+  filter(p.value < .05) %>%
+  pull(contrast)
+first_fix_contrasts_df$supported <-
+  first_fix_contrasts_df$contrast %in% first_fix_supported_contrasts
+```
+
+```{r bm2.1_first_fix_prob_theoretical_plot_study1, fig.height=5, fig.width=13}
+p_first_fix_contrasts <- ggplot(
+  first_fix_contrasts_df,
+  aes(
+    x = Perf_Strivings_c,
+    y = estimate,
+    color = contrast,
+    group = contrast,
+    linewidth = supported,
+    alpha = supported
+  )
+) +
+  geom_hline(
+    yintercept = 0,
+    color = "grey60",
+    linetype = "dashed"
+  ) +
+  geom_line() +
+  scale_color_manual(values = contrast_colors, breaks = names(contrast_colors),
+                     labels = contrast_labels) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Strivings",
+    y = "Predicted contrast",
+    color = "Theoretical contrast"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  )
+
+grid.arrange(
+  p_first_fix_categories, p_first_fix_contrasts,
+  ncol = 2,
+  top = textGrob(
+    "Predicted probability of first or second fixation",
+    gp = gpar(fontface = "bold", fontsize = 20)
+  )
+)
+```
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### 2. Latency to First Fixation
+
+Latency to first fixation was modeled using a **beta GLMM** with a logit link for the mean parameter.
+
+##### bm0_first_fix_latency
+
+**Null model**
+
+```{r bm0_first_fix_latency_study1}
+bm0_first_fix_latency <- glmmTMB(
+  first_fix_latency_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id), 
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_first_fix_latency)
+```
+
+
+##### bm1_first_fix_latency
+
+**Partial Model**
+
+```{r bm1_first_fix_latency_study1}
+bm1_first_fix_latency <- glmmTMB(
+  first_fix_latency_t01 ~ 
+    IA_LABEL_f +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id), 
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu)
+)
+summary(bm1_first_fix_latency)
+```
+
+**Comparison of model fit (bm1 vs. bm0)** 
+
+```{r bm1_first_fix_latency_fit_study1}
+lrtest(bm0_first_fix_latency, bm1_first_fix_latency)
+
+AIC(bm1_first_fix_latency, bm0_first_fix_latency)
+```
+
+
+**Model diagnostics (bm1)**
+
+```{r bm1_first_fix_latency_resid_study1, fig.height=4, fig.width=10}
+p1 <- diag_resid_fitted(bm1_first_fix_latency)
+p2 <- diag_ppc_beta(bm1_first_fix_latency)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+
+##### bm2.1_first_fix_latency
+
+**Full model: Perfectionistic Strivings**
+
+```{r bm2.1_first_fix_latency_study1}
+bm2.1_first_fix_latency <- glmmTMB(
+  first_fix_latency_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id), 
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_first_fix_latency)
+```
+
+
+
+**Comparison of model fit (bm2.1 vs. bm1)** 
+
+```{r bm2.1_first_fix_latency_fit_study1}
+lrtest(bm1_first_fix_latency, bm2.1_first_fix_latency)
+
+AIC(bm2.1_first_fix_latency, bm1_first_fix_latency)
+```
+
+
+##### bm2.2_first_fix_latency
+
+**Full model: Perfectionistic Concerns**
+
+```{r bm2.2_first_fix_latency_study1}
+bm2.2_first_fix_latency <- glmmTMB(
+  first_fix_latency_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id), 
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_first_fix_latency)
+```
+
+**Comparison of model fit (bm2.2 vs. bm1)** 
+
+```{r bm2.2_first_fix_latency_fit_study1}
+lrtest(bm1_first_fix_latency, bm2.2_first_fix_latency)
+
+AIC(bm2.2_first_fix_latency, bm1_first_fix_latency)
+```
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### 3. Dwell Time (Early Phase)
+
+Dwell time in the early phase was modeled using a **beta GLMM** with a logit link for the mean parameter.
+
+##### bm0_dwell_time_early
+
+**Null model**
+
+```{r bm0_dwell_time_early_study_1}
+bm0_dwell_time_early <- glmmTMB(
+  dwell_time_early_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_dwell_time_early)
+```
+
+##### bm1_dwell_time_early
+
+**Partial Model**
+
+```{r bm1_dwell_time_early_study_1}
+bm1_dwell_time_early <- glmmTMB(
+  dwell_time_early_t01 ~ 
+    IA_LABEL_f +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm1_dwell_time_early)
+```
+
+**Comparison of model fit (bm1 vs. bm0)**
+
+```{r bm1_dwell_time_early_fit_study_1}
+lrtest(bm1_dwell_time_early, bm0_dwell_time_early)
+
+AIC(bm1_dwell_time_early, bm0_dwell_time_early)
+```
+
+
+##### bm2.1_dwell_time_early
+
+**Full Model: Perfectionistic Strivings**
+
+```{r bm2.1_dwell_time_early_study_1}
+bm2.1_dwell_time_early <- glmmTMB(
+  dwell_time_early_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_dwell_time_early)
+```
+
+**Comparison of model fit (bm2.1 vs. bm1)**
+
+```{r bm2.1_dwell_time_early_fit_study_1}
+lrtest(bm2.1_dwell_time_early, bm1_dwell_time_early)
+
+AIC(bm2.1_dwell_time_early, bm1_dwell_time_early)
+```
+
+
+**Model diagnostics (bm2.1)**
+
+```{r bm2.1_dwell_time_early_resid_study_1, fig.height=4, fig.width=10 }
+p1 <- diag_resid_fitted(bm2.1_dwell_time_early)
+p2 <- diag_ppc_beta(bm2.1_dwell_time_early)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+**Planned comparisons of the retained interaction**
+
+The supported Strivings interaction was examined using estimated Strivings
+slopes within each semantic category and the four theory-based comparisons
+among those slopes. No models were refitted with alternative reference levels.
+
+```{r bm2.1_dwell_time_early_emmeans_study1}
+early_dwell_strivings_slopes <- emtrends(
+  bm2.1_dwell_time_early,
+  ~ IA_LABEL_f,
+  var = "Perf_Strivings_c"
+)
+summary(early_dwell_strivings_slopes, infer = c(TRUE, TRUE))
+early_dwell_planned_slopes <- contrast(
+  early_dwell_strivings_slopes,
+  method = semantic_planned,
+  adjust = "none"
+)
+early_dwell_planned_slopes
+```
+##### bm2.2_dwell_time_early
+
+**Full Model: Perfectionistic Concerns**
+
+```{r bm2.2_dwell_time_early_study_1}
+bm2.2_dwell_time_early <- glmmTMB(
+  dwell_time_early_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_dwell_time_early)
+```
+
+
+
+
+**Comparison of model fit (bm2.2 vs. bm1)**
+
+```{r bm2.2_dwell_time_early_fit_study_1}
+lrtest(bm2.2_dwell_time_early, bm1_dwell_time_early)
+
+AIC(bm2.2_dwell_time_early, bm1_dwell_time_early)
+```
+
+**Plotting the retained interaction**
+
+```{r bm2.1_dwell_time_early_plot_study1, fig.height=5, fig.width=7}
+preds_dwell_time_early_PS <- ggpredict(
+  bm2.1_dwell_time_early,
+  terms = c("Perf_Strivings_c [all]", "IA_LABEL_f")
+)
+
+p_early_dwell_data <- as.data.frame(preds_dwell_time_early_PS) %>%
+  mutate(
+    group = factor(as.character(group), levels = semantic_levels),
+    supported = as.character(group) == "Success"
+  )
+stopifnot(
+  !anyNA(p_early_dwell_data$group),
+  setequal(as.character(unique(p_early_dwell_data$group)), semantic_levels)
+)
+
+p_early_dwell_categories <- ggplot(
+  p_early_dwell_data,
+  aes(x = x, y = predicted, group = group, color = group,
+      linewidth = supported, alpha = supported)
+) +
+  geom_line() +
+  scale_color_manual(values = semantic_colors, breaks = semantic_levels,
+                     labels = semantic_levels, drop = FALSE) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Strivings",
+    y = "Predicted proportion",
+    color = "Semantic category"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.y = element_blank()
+  )
+```
+
+```{r bm2.1_dwell_time_early_theoretical_contrasts_study1}
+strivings_grid_early <- seq(
+  min(sub_et_qu$Perf_Strivings_c, na.rm = TRUE),
+  max(sub_et_qu$Perf_Strivings_c, na.rm = TRUE),
+  length.out = 100
+)
+
+early_dwell_emm <- emmeans(
+  bm2.1_dwell_time_early,
+  ~ IA_LABEL_f | Perf_Strivings_c,
+  at = list(Perf_Strivings_c = strivings_grid_early)
+)
+
+early_dwell_contrasts <- contrast(
+  regrid(early_dwell_emm, transform = "response"),
+  method = semantic_planned,
+  by = "Perf_Strivings_c",
+  adjust = "none"
+)
+
+early_dwell_contrasts_df <- as.data.frame(early_dwell_contrasts) %>%
+  mutate(contrast = factor(as.character(contrast), levels = names(contrast_colors)))
+stopifnot(
+  !anyNA(early_dwell_contrasts_df$contrast),
+  setequal(as.character(unique(early_dwell_contrasts_df$contrast)), names(contrast_colors))
+)
+early_dwell_supported_contrasts <- as.data.frame(early_dwell_planned_slopes) %>%
+  filter(p.value < .05) %>%
+  pull(contrast)
+early_dwell_contrasts_df$supported <-
+  early_dwell_contrasts_df$contrast %in% early_dwell_supported_contrasts
+```
+
+```{r bm2.1_dwell_time_early_theoretical_plot_study1, fig.height=5, fig.width=13}
+p_early_dwell_contrasts <- ggplot(
+  early_dwell_contrasts_df,
+  aes(x = Perf_Strivings_c, y = estimate, color = contrast,
+      group = contrast, linewidth = supported, alpha = supported)
+) +
+  geom_hline(yintercept = 0, color = "grey60", linetype = "dashed") +
+  geom_line() +
+  scale_color_manual(values = contrast_colors, breaks = names(contrast_colors),
+                     labels = contrast_labels) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Strivings",
+    y = "Predicted contrast",
+    color = "Theoretical contrast"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  )
+
+grid.arrange(
+  p_early_dwell_categories, p_early_dwell_contrasts,
+  ncol = 2,
+  top = textGrob(
+    "Predicted early dwell-time proportion",
+    gp = gpar(fontface = "bold", fontsize = 20)
+  )
+)
+```
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### 4. Dwell Time (Intermediate Phase)
+
+Dwell time in the intermediate phase was modeled using a **beta GLMM** with a logit link for the mean parameter.
+
+##### bm0_dwell_time_intermediate
+
+**Null model**
+
+```{r bm0_dwell_time_intermediate_study1}
+bm0_dwell_time_intermediate <- glmmTMB(
+  dwell_time_intermediate_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_dwell_time_intermediate)
+```
+
+
+
+##### bm1_dwell_time_intermediate: 
+
+**Partial Model**
+
+```{r bm1_dwell_time_intermediate_study1}
+bm1_dwell_time_intermediate <- glmmTMB(
+  dwell_time_intermediate_t01 ~ 
+    IA_LABEL_f +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm1_dwell_time_intermediate)
+```
+
+
+
+
+**Comparison of model fit (bm1 vs. bm0)**
+
+```{r bm1_dwell_time_intermediate_fit_study1}
+lrtest(bm1_dwell_time_intermediate, bm0_dwell_time_intermediate)
+
+AIC(bm1_dwell_time_intermediate, bm0_dwell_time_intermediate)
+```
+
+##### bm2.1_dwell_time_intermediate
+
+**Full Model: Perfectionistic Strivings**
+
+```{r bm2.1_dwell_time_intermediate_study1}
+bm2.1_dwell_time_intermediate <- glmmTMB(
+  dwell_time_intermediate_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_dwell_time_intermediate)
+```
+
+
+
+
+**Comparison of model fit (bm2.1 vs. bm1)**
+
+```{r bm2.1_dwell_time_intermediate_fit_study1}
+lrtest(bm2.1_dwell_time_intermediate, bm1_dwell_time_intermediate)
+
+AIC(bm2.1_dwell_time_intermediate, bm1_dwell_time_intermediate)
+```
+
+
+The Strivings model did not significantly improve fit and is not followed up.
+
+
+##### bm2.2_dwell_time_intermediate
+
+**Full Model: Perfectionistic Concerns**
+
+```{r bm2.2_dwell_time_intermediate_study1}
+bm2.2_dwell_time_intermediate <- glmmTMB(
+  dwell_time_intermediate_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_dwell_time_intermediate)
+```
+
+
+
+
+**Comparison of model fit (bm2.2 vs. bm1)**
+
+```{r bm2.2_dwell_time_intermediate_fit_study1}
+lrtest(bm2.2_dwell_time_intermediate, bm1_dwell_time_intermediate)
+
+AIC(bm2.2_dwell_time_intermediate, bm1_dwell_time_intermediate)
+```
+
+
+**Model diagnostics (bm2.2)**
+
+```{r bm2.2_dwell_time_intermediate_resid_study1, fig.height=4, fig.width=10}
+p1 <- diag_resid_fitted(bm2.2_dwell_time_intermediate)
+p2 <- diag_ppc_beta(bm2.2_dwell_time_intermediate)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+**Planned comparisons of the retained interaction**
+
+The supported Concerns interaction was examined using estimated Concerns
+slopes within each semantic category and the four theory-based comparisons
+among those slopes.
+
+```{r bm2.2_dwell_time_intermediate_emmeans_study1}
+intermediate_dwell_concerns_slopes <- emtrends(
+  bm2.2_dwell_time_intermediate,
+  ~ IA_LABEL_f,
+  var = "Perf_Concerns_c"
+)
+summary(intermediate_dwell_concerns_slopes, infer = c(TRUE, TRUE))
+intermediate_dwell_planned_slopes <- contrast(
+  intermediate_dwell_concerns_slopes,
+  method = semantic_planned,
+  adjust = "none"
+)
+intermediate_dwell_planned_slopes
+```
+
+**Plotting the retained interaction**
+
+```{r bm2.2_dwell_time_intermediate_plot_study1, fig.height=5, fig.width=7}
+preds_dwell_time_intermediate_PC <- ggpredict(
+  bm2.2_dwell_time_intermediate,
+  terms = c("Perf_Concerns_c [all]", "IA_LABEL_f")
+)
+
+p_intermediate_dwell_data <- as.data.frame(preds_dwell_time_intermediate_PC) %>%
+  mutate(
+    group = factor(as.character(group), levels = semantic_levels),
+    supported = as.character(group) == "Negative"
+  )
+stopifnot(
+  !anyNA(p_intermediate_dwell_data$group),
+  setequal(as.character(unique(p_intermediate_dwell_data$group)), semantic_levels)
+)
+
+p_intermediate_dwell_categories <- ggplot(
+  p_intermediate_dwell_data,
+  aes(x = x, y = predicted, group = group, color = group,
+      linewidth = supported, alpha = supported)
+) +
+  geom_line() +
+  scale_color_manual(values = semantic_colors, breaks = semantic_levels,
+                     labels = semantic_levels, drop = FALSE) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Concerns",
+    y = "Predicted proportion",
+    color = "Semantic category"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.y = element_blank()
+  )
+```
+
+```{r bm2.2_dwell_time_intermediate_theoretical_contrasts_study1}
+concerns_grid_intermediate <- seq(
+  min(sub_et_qu$Perf_Concerns_c, na.rm = TRUE),
+  max(sub_et_qu$Perf_Concerns_c, na.rm = TRUE),
+  length.out = 100
+)
+
+intermediate_dwell_emm <- emmeans(
+  bm2.2_dwell_time_intermediate,
+  ~ IA_LABEL_f | Perf_Concerns_c,
+  at = list(Perf_Concerns_c = concerns_grid_intermediate)
+)
+
+intermediate_dwell_contrasts <- contrast(
+  regrid(intermediate_dwell_emm, transform = "response"),
+  method = semantic_planned,
+  by = "Perf_Concerns_c",
+  adjust = "none"
+)
+
+intermediate_dwell_contrasts_df <- as.data.frame(
+  intermediate_dwell_contrasts
+) %>%
+  mutate(contrast = factor(as.character(contrast), levels = names(contrast_colors)))
+stopifnot(
+  !anyNA(intermediate_dwell_contrasts_df$contrast),
+  setequal(as.character(unique(intermediate_dwell_contrasts_df$contrast)),
+           names(contrast_colors))
+)
+intermediate_dwell_supported_contrasts <-
+  as.data.frame(intermediate_dwell_planned_slopes) %>%
+  filter(p.value < .05) %>%
+  pull(contrast)
+intermediate_dwell_contrasts_df$supported <-
+  intermediate_dwell_contrasts_df$contrast %in%
+  intermediate_dwell_supported_contrasts
+```
+
+```{r bm2.2_dwell_time_intermediate_theoretical_plot_study1, fig.height=5, fig.width=13}
+p_intermediate_dwell_contrasts <- ggplot(
+  intermediate_dwell_contrasts_df,
+  aes(x = Perf_Concerns_c, y = estimate, color = contrast,
+      group = contrast, linewidth = supported, alpha = supported)
+) +
+  geom_hline(yintercept = 0, color = "grey60", linetype = "dashed") +
+  geom_line() +
+  scale_color_manual(values = contrast_colors, breaks = names(contrast_colors),
+                     labels = contrast_labels) +
+  scale_linewidth_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  scale_alpha_manual(values = c(`FALSE` = 0.65, `TRUE` = 1), guide = "none") +
+  labs(
+    title = NULL,
+    x = "Perfectionistic Concerns",
+    y = "Predicted contrast",
+    color = "Theoretical contrast"
+  ) +
+  figure3_theme +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  )
+
+grid.arrange(
+  p_intermediate_dwell_categories,
+  p_intermediate_dwell_contrasts,
+  ncol = 2,
+  top = textGrob(
+    "Predicted intermediate dwell-time proportion",
+    gp = gpar(fontface = "bold", fontsize = 20)
+  )
+)
+```
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### 5. Dwell Time (Late Phase)
+
+##### bm0_dwell_time_late
+
+**Null model**
+
+```{r bm0_dwell_time_late_study1}
+bm0_dwell_time_late <- glmmTMB(
+  dwell_time_late_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_dwell_time_late)
+```
+
+
+
+
+##### bm1_dwell_time_late
+
+**Partial Model**
+
+```{r bm1_dwell_time_late_study1}
+bm1_dwell_time_late <- glmmTMB(
+  dwell_time_late_t01 ~ 
+    IA_LABEL_f +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm1_dwell_time_late)
+```
+
+
+
+
+**Comparison of model fit (bm1 vs. bm0)**
+
+```{r bm1_dwell_time_late_fit_study1}
+lrtest(bm1_dwell_time_late, bm0_dwell_time_late)
+
+AIC(bm1_dwell_time_late, bm0_dwell_time_late)
+```
+
+
+**Model diagnostics (bm1)**
+
+```{r bm1_dwell_time_late_resid_study1, fig.height=4, fig.width=10}
+p1 <- diag_resid_fitted(bm1_dwell_time_late)
+p2 <- diag_ppc_beta(bm1_dwell_time_late)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+
+##### bm2.1_dwell_time_late
+
+**Full Model: Perfectionistic Strivings**
+
+```{r bm2.1_dwell_time_late_study1}
+bm2.1_dwell_time_late <- glmmTMB(
+  dwell_time_late_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_dwell_time_late)
+```
+
+**Comparison of model fit (bm2.1 vs. bm1)**
+
+```{r bm2.1_dwell_time_late_fit_study1}
+lrtest(bm1_dwell_time_late, bm2.1_dwell_time_late)
+
+AIC(bm1_dwell_time_late, bm2.1_dwell_time_late)
+```
+
+##### bm2.2_dwell_time_late
+
+**Full Model: Perfectionistic Concerns**
+
+```{r bm2.2_dwell_time_late_study1}
+bm2.2_dwell_time_late <- glmmTMB(
+  dwell_time_late_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_dwell_time_late)
+```
+
+**Comparison of model fit (bm2.2 vs. bm1)**
+
+```{r bm2.2_dwell_time_late_fit_study1}
+lrtest(bm1_dwell_time_late, bm2.2_dwell_time_late)
+
+AIC(bm1_dwell_time_late, bm2.2_dwell_time_late)
+```
+
+Neither perfectionism model significantly improved fit over the partial model, so no interactions were decomposed or plotted.
+
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+### Dwell Time (Whole Trial)
+
+Whole-trial dwell time was modeled using a **beta GLMM** with the same logit link used for the phase-specific dwell-time indices. This common link makes the models easier to compare; adequacy for the heavier-tailed whole-trial distribution was checked using the simulation-based diagnostics below.
+
+##### bm0_dwell_time
+
+**Null model**
+
+```{r bm0_dwell_time_study1}
+bm0_dwell_time <- glmmTMB(
+  dwell_time_t01 ~ 
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm0_dwell_time)
+```
+
+##### bm1_dwell_time
+
+**Partial Model**
+
+```{r bm1_dwell_time_study1}
+bm1_dwell_time <- glmmTMB(
+  dwell_time_t01 ~ 
+    IA_LABEL_f +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm1_dwell_time)
+```
+
+**Comparison of model fit (bm1 vs. bm0)** 
+
+```{r bm1_dwell_time_fit_study1}
+lrtest(bm1_dwell_time, bm0_dwell_time)
+
+AIC(bm1_dwell_time, bm0_dwell_time)
+```
+
+
+**Model diagnostics (bm1)**
+
+```{r bm1_dwell_time_resid_study1, fig.height=4, fig.width=10}
+p1 <- diag_resid_fitted(bm1_dwell_time)
+p2 <- diag_ppc_beta(bm1_dwell_time)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+  
+    
+##### bm2.1_dwell_time
+
+**Full Model: Perfectionistic Strivings**
+
+```{r bm2.1_dwell_time_study1}
+bm2.1_dwell_time <- glmmTMB(
+  dwell_time_t01 ~ 
+    IA_LABEL_f * Perf_Strivings_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.1_dwell_time)
+```
+
+**Comparison of model fit (bm2.1 vs. bm1)** 
+
+```{r bm2.1_dwell_time_fit_study1}
+lrtest(bm2.1_dwell_time, bm1_dwell_time)
+
+AIC(bm2.1_dwell_time, bm1_dwell_time)
+```
+
+
+##### bm2.2_dwell_time
+
+**Full Model: Perfectionistic Concerns**
+
+```{r bm2.2_dwell_time_study1}
+bm2.2_dwell_time <- glmmTMB(
+  dwell_time_t01 ~ 
+    IA_LABEL_f * Perf_Concerns_c +
+    block_nr_c +
+    Change_category01 +
+    #(1 | block_id) +  
+    (1 + Change_category01 || subject_id),
+  dispformula = ~ guessed_block_rule,
+  family = beta_family(link = "logit"),
+  data = na.omit(sub_et_qu),
+  
+)
+summary(bm2.2_dwell_time)
+```
+
+**Comparison of model fit (bm2.2 vs. bm1)** 
+
+```{r bm2.2_dwell_time_fit_study1}
+lrtest(bm2.2_dwell_time, bm1_dwell_time)
+
+AIC(bm2.2_dwell_time, bm1_dwell_time)
+```
+
+Neither perfectionism model significantly improved fit over the partial model, so no interactions were decomposed or plotted.
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\
+
+## iii) Gamma Regression for Response Time
+
+Response time was analyzed using **gamma generalized linear mixed-effects regression**, as this variable was continuous, strictly positive, and right-skewed.
+
+The gamma distribution is well suited for such data because it accommodates positive values with asymmetric, long-tailed distributions. A **log link** was used so that predicted values remained positive and coefficients could be interpreted on a multiplicative scale.
+
+In addition to modeling the expected value of the outcome (\(\mu\)), `glmmTMB` allows the **gamma dispersion parameter** to be modeled as a function of predictors. Rule awareness was included in this submodel to allow residual variability in response time to differ after participants inferred the block rule.
+
+### Model Overview
+
+- **Outcome:** Response time  
+- **Distribution:** Gamma  
+- **Link function:** Log  
+- **Parameters:**  
+  - \(\mu\): mean (expected response time)  
+  - \(\sigma\): dispersion (variability in response time)  
+
+Exponentiating a gamma-model coefficient does not yield an additive change in milliseconds. (The resulting value is a conditional multiplicative ratio in expected response time: for example, 1.10 indicates a 10% increase and 0.90 a 10% decrease for a one-unit predictor change, holding the other terms constant.) Response-scale interpretation uses estimated marginal trends or exponentiated predictions formed from the complete linear predictor.
+
+### Model Specification for Response Times
+
+#### Mean Submodel (\(\mu\))
+
+\[
+\begin{aligned}
+\log(\mu_{ij}) ={}& \beta_0 + \sum_{k=1}^{4}\beta_k C_{k,ij} + \beta_5 Perf_j + \beta_6 TrialOrder_{ij} \\
+&+ \sum_{k=1}^{4}\gamma_k(C_{k,ij}\times Perf_j) \\
+&+ u_{0j}.
+\end{aligned}
+\]
+
+where:
+
+- \(\mu_{ij}\): expected response time for trial \(i\) and participant \(j\)  
+- \(C_{k,ij}\): four indicator variables for positive, negative, success-related, and failure-related changed words; neutral is the reference category  
+- \(Perf_j\): perfectionism (Perfectionistic Strivings or Perfectionistic Concerns, modeled in separate analyses; mean-centered)  
+- \(TrialOrder_{ij}\): numeric presentation order of the trial (1–75)  
+- \(u_{0j}\): participant-specific random intercept  
+
+#### Dispersion Submodel (\(\sigma\))
+
+\[
+\log(\sigma_{ij}) = \gamma_0 + \gamma_1 BR_{ij}
+\]
+
+where:
+
+- \(\sigma_{ij}\): dispersion (variability in response time)  
+- \(BR_{ij}\): rule awareness (0 = no, 1 = yes)  
+
+
+### Data Preparation for Gamma Models
+
+To reduce memory usage and computation time, a subset containing only variables required for model fitting was created.
+
+```{r subset_rt_data_study1}
+sub_rt_qu <- rt_qu[c("response_time",
+                     "subject_id", "block_id", "trial_nr_c", "guessed_block_rule",
+                     "Change_category_f", "Perf_Strivings_c",
+                     "Perf_Concerns_c")]
+```
+
+
+### 4. Response Time
+
+Response time was modeled using a gamma GLMM with a log link for the mean parameter.
+
+##### gm0_response_time
+
+**Null model**
+
+```{r gm0_response_time_study1}
+gm0_response_time <- glmmTMB(
+  response_time ~ 
+    trial_nr_c +
+    #(1 | block_id) +
+    (1 | subject_id),
+  family = Gamma(link = "log"),
+  dispformula = ~ guessed_block_rule,
+  data = na.omit(sub_rt_qu),
+  
+)
+summary(gm0_response_time)
+```
+
+##### gm1_response_time
+
+**Partial Model**
+
+```{r gm1_response_time_study1}
+gm1_response_time <- glmmTMB(
+  response_time ~ 
+    Change_category_f + 
+    trial_nr_c +
+    #(1 | block_id) +
+    (1 | subject_id),
+  family = Gamma(link = "log"),
+  dispformula = ~ guessed_block_rule,
+  data = na.omit(sub_rt_qu),
+  
+)
+summary(gm1_response_time)
+```
+
+**Comparison of model fit (gm1 vs. gm0)** 
+
+```{r gm1_response_time_fit_study1}
+lrtest(gm1_response_time, gm0_response_time)
+
+AIC(gm1_response_time, gm0_response_time)
+```
+
+**Model diagnostics (gm1)**
+
+```{r gm1_response_time_resid_study1, fig.height=4, fig.width=10}
+p1 <- diag_resid_fitted(gm1_response_time)
+p2 <- diag_ppc_gamma(gm1_response_time)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+##### gm2.1_response_time
+
+**Full Model: Perfectionistic Strivings**
+
+```{r gm2.1_response_time_study1}
+gm2.1_response_time <- glmmTMB(
+  response_time ~ 
+    Change_category_f * Perf_Strivings_c + 
+    trial_nr_c +
+    #(1 | block_id) +
+    (1 | subject_id),
+  family = Gamma(link = "log"),
+  dispformula = ~ guessed_block_rule,
+  data = na.omit(sub_rt_qu),
+  
+)
+summary(gm2.1_response_time)
+```
+
+**Comparison of model fit (gm2.1 vs. gm1)**
+
+```{r gm2.1_response_time_fit_study1}
+lrtest(gm2.1_response_time, gm1_response_time)
+
+AIC(gm2.1_response_time, gm1_response_time)
+```
+
+
+##### gm2.2_response_time
+
+**Full Model: Perfectionistic Concerns**
+
+```{r gm2.2_response_time_study1}
+gm2.2_response_time <- glmmTMB(
+  response_time ~ 
+    Change_category_f * Perf_Concerns_c + 
+    trial_nr_c +
+    #(1 | block_id) +
+    (1 | subject_id),
+  family = Gamma(link = "log"),
+  dispformula = ~ guessed_block_rule,
+  data = na.omit(sub_rt_qu),
+  
+)
+summary(gm2.2_response_time)
+```
+
+**Comparison of model fit (gm2.2 vs. gm1)**
+
+```{r gm2.2_response_time_fit_study1}
+lrtest(gm2.2_response_time, gm1_response_time)
+
+AIC(gm2.2_response_time, gm1_response_time)
+```
+
+
+Neither perfectionism model significantly improved fit over the partial model, so no interactions were decomposed or plotted.
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+# References
+
+Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. Journal of Memory and Language, 68(3), 255–278. <https://doi.org/10.1016/j.jml.2012.11.001>
+
+Bolker, B. M., Brooks, M. E., Clark, C. J., Geange, S. W., Poulsen, J. R., Stevens, M. H. H., & White, J.-S. S. (2009). Generalized linear mixed models: A practical guide for ecology and evolution. Trends in Ecology & Evolution, 24(3), 127–135.
+<https://doi.org/10.1016/j.tree.2008.10.008>
+
+Douma, J. C., & Weedon, J. T. (2019). Analysing continuous proportions
+in ecology and evolution: A practical introduction to beta and Dirichlet
+regression. Methods in Ecology and Evolution, 10(9), 1412–1430.
+<https://doi.org/10.1111/2041-210X.13234>
+
+Lo, S., & Andrews, S. (2015). To transform or not to transform: Using generalized linear mixed models to analyse reaction time data. Frontiers in Psychology, 6, Article 1171.
+<https://doi.org/10.3389/fpsyg.2015.01171> 
+
+Skinner, I. W., Hübscher, M., Moseley, G. L., Lee, H., Wand, B. M., Traeger, A. C., Gustin, S. M., & McAuley, J. H. (2018). The reliability of eyetracking to assess attentional bias to threatening words in healthy individuals. Behavior Research Methods, 50(5), 1778–1792. <https://doi.org/10.3758/s13428-017-0946-y>
+
+Stoeber, J., & Otto, K. (2006). Positive Conceptions of Perfectionism: Approaches, Evidence, Challenges. Personality and Social Psychology Review, 10(4), 295–319. <https://doi.org/10.1207/s15327957pspr1004_2>
+
+Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg, C. W., Nielsen, A., Skaug, H. J., Mächler, M., & Bolker, B. M. (2017). glmmTMB balances speed and flexibility among packages for zero-inflated generalized linear mixed modeling. *The R Journal, 9*(2), 378–400. <https://doi.org/10.32614/RJ-2017-066>

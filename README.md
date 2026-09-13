@@ -66,18 +66,19 @@ ab-perfectionism-analysis/
 ├── README.md
 ├── CITATION.cff
 ├── LICENSE
-├── AB_Perfectionism_Analysis.Rproj
-├── AB_Perfectionism_Analysis_1.Rmd
-├── AB_Perfectionism_Analysis_2.Rmd
-├── AB_Perfectionism_Study1_Preparation.R
-├── AB_Perfectionism_Study1_Sup_Ctrl.R
-├── AB_Perfectionism_Study2_Preparation.R
-├── AB_Perfectionism_Study2_Sup_t1.R
+├── AB_Perfectionism_Analysis/
+│   ├── AB_Perfectionism_Analysis.Rproj
+│   ├── AB_Perfectionism_Analysis_1.Rmd
+│   ├── AB_Perfectionism_Analysis_2.Rmd
+│   ├── AB_Perfectionism_Study1_Preparation.R
+│   ├── AB_Perfectionism_Study1_Sup_Ctrl.R
+│   ├── AB_Perfectionism_Study2_Preparation.R
+│   ├── AB_Perfectionism_Study2_Sup_t1.R
+│   └── AB_Perfectionism_Data/
+│       └── README.md
 ├── reports/
 │   ├── AB_Perfectionism_Analysis_1.html
 │   └── AB_Perfectionism_Analysis_2.html
-└── AB_Perfectionism_Data/
-    └── README.md
 ```
 
 The R Markdown documents provide the complete annotated workflows. The preparation scripts create the analysis-ready objects used by the supplementary scripts, and each supplementary script sources the corresponding preparation file automatically.
@@ -108,21 +109,21 @@ Complete knitted Study 2 report containing:
 
 ### R Markdown source documents
 
-#### `AB_Perfectionism_Analysis_1.Rmd`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Analysis_1.Rmd`
 
 Source document used to generate the complete annotated Study 1 report. It contains the data-preparation steps, statistical models, model comparisons, diagnostics, follow-up analyses, and figures.
 
-#### `AB_Perfectionism_Analysis_2.Rmd`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Analysis_2.Rmd`
 
 Source document used to generate the complete annotated Study 2 report. It contains the data-preparation steps, manipulation checks, primary analyses, model comparisons, diagnostics, and figures.
 
 ### Data-preparation scripts
 
-#### `AB_Perfectionism_Study1_Preparation.R`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Study1_Preparation.R`
 
 Imports and prepares the Study 1 questionnaire, eye-tracking, and response-time data. It applies the analytical exclusions, defines the task-completer sample, derives the attentional indices and questionnaire composites, centers the task-order and perfectionism predictors, and prepares the semantic-category variables required by the main and supplementary models.
 
-#### `AB_Perfectionism_Study2_Preparation.R`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Study2_Preparation.R`
 
 Imports and prepares the Study 2 questionnaire, experimental, eye-tracking, and response-time data. It applies the analytical exclusions, retains participants with the required task data, constructs paired pre- and post-manipulation outcomes, derives task-accuracy and rule-awareness variables, centers the required predictors, and prepares condition and semantic-category variables.
 
@@ -130,21 +131,21 @@ The preparation scripts contain no descriptive tables or exploratory plots. They
 
 ### Supplementary analysis scripts
 
-#### `AB_Perfectionism_Study1_Sup_Ctrl.R`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Study1_Sup_Ctrl.R`
 
 Repeats the Study 1 attentional analyses while controlling for depressive and anxiety symptoms.
 
-#### `AB_Perfectionism_Study2_Sup_t1.R`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Study2_Sup_t1.R`
 
 Tests perfectionism-related attentional patterns in the Study 2 subsample using only the pre-manipulation assessment.
 
 ### Data documentation
 
-#### `AB_Perfectionism_Data/README.md`
+#### `AB_Perfectionism_Analysis/AB_Perfectionism_Data/README.md`
 
 Describes the data files and variables required to reproduce the analyses, together with the principal exclusion and preprocessing procedures.
 
-The participant-level data are not included in the public repository. Researchers who obtain the data from the corresponding author should place the supplied files in an `AB_Perfectionism_Data/` directory at the repository root. This preserves the relative paths used by the R Markdown documents.
+The participant-level data are not included in the public repository. Researchers who obtain the data from the corresponding author should place the supplied files in `AB_Perfectionism_Analysis/AB_Perfectionism_Data/`. This preserves the relative paths used by the R Markdown documents when the included RStudio project is open.
 
 ## Viewing the HTML reports
 
@@ -174,7 +175,7 @@ Readers who only wish to examine the analyses can use the HTMLPreview links or d
 git clone https://github.com/mrhmatar/ab-perfectionism-analysis.git
 ```
 
-2. Open `AB_Perfectionism_Analysis.Rproj` in RStudio.
+2. Open `AB_Perfectionism_Analysis/AB_Perfectionism_Analysis.Rproj` in RStudio.
 
 3. Preserve the repository’s directory structure. The documents use paths relative to the project root.
 
@@ -183,54 +184,33 @@ git clone https://github.com/mrhmatar/ab-perfectionism-analysis.git
 5. Place the supplied data files in:
 
 ```text
-AB_Perfectionism_Data/
+AB_Perfectionism_Analysis/AB_Perfectionism_Data/
 ```
 
-6. Run or knit the relevant R Markdown document:
+6. Open the relevant R Markdown document:
 
 ```text
-AB_Perfectionism_Analysis_1.Rmd
-AB_Perfectionism_Analysis_2.Rmd
+AB_Perfectionism_Analysis/AB_Perfectionism_Analysis_1.Rmd
+AB_Perfectionism_Analysis/AB_Perfectionism_Analysis_2.Rmd
 ```
+
+7. Click **Knit** in RStudio. Each document produces a self-contained HTML file in `AB_Perfectionism_Analysis/`.
+
+The R Markdown documents use standard knitting and do not render automatically when their chunks are run individually or with **Run All**.
 
 The supplementary analysis scripts source their corresponding preparation scripts automatically.
 
 ## Knitting the analysis reports
 
-The reports should be generated as self-contained HTML files so that their figures and other resources are embedded in the output. The R Markdown YAML header should include:
+Both R Markdown documents are configured to generate self-contained HTML reports. To regenerate a report:
 
-```yaml
-output:
-  html_document:
-    self_contained: true
-```
+1. Open `AB_Perfectionism_Analysis/AB_Perfectionism_Analysis.Rproj` in RStudio.
+2. Open the relevant `.Rmd` file.
+3. Click **Knit** and wait for the analysis to finish.
+4. Confirm that the resulting HTML report opens correctly.
+5. When preparing a repository update, copy the new HTML file from `AB_Perfectionism_Analysis/` into `reports/`, replacing the previous report with the same filename.
 
-The reports can be rendered into `reports/` with:
-
-```r
-dir.create("reports", showWarnings = FALSE)
-
-rmarkdown::render(
-  input = "AB_Perfectionism_Analysis_1.Rmd",
-  output_file = "AB_Perfectionism_Analysis_1.html",
-  output_dir = "reports"
-)
-
-rmarkdown::render(
-  input = "AB_Perfectionism_Analysis_2.Rmd",
-  output_file = "AB_Perfectionism_Analysis_2.html",
-  output_dir = "reports"
-)
-```
-
-If the reports are not self-contained, R Markdown may generate accompanying directories such as:
-
-```text
-AB_Perfectionism_Analysis_1_files/
-AB_Perfectionism_Analysis_2_files/
-```
-
-Those directories would also need to be included for the reports to display correctly.
+Because `self_contained: true` is specified in both YAML headers, the committed reports do not depend on accompanying `_files` directories. Such a directory may remain after an interrupted or failed render and is not needed once the corresponding self-contained HTML report has been created successfully.
 
 ## Software requirements
 
@@ -251,7 +231,7 @@ Package dependencies are loaded within the documents. A future version of the re
 ## Reproducibility notes
 
 - The repository is organized as a self-contained R project.
-- File paths assume that the working directory is the project root.
+- File paths assume that the working directory is `AB_Perfectionism_Analysis/`, as set by the included RStudio project.
 - The directory structure should be preserved.
 - The knitted HTML reports provide the most accessible record of the completed analyses.
 - The `.Rmd` files provide the complete reproducible source documents.

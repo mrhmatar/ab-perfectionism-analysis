@@ -1568,6 +1568,50 @@ ip_neg_1 <- ggplot(
 ip_neg_1
 ```
 
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+# iv) Secondary Process-Verification Analysis
+
+This secondary analysis examined whether ABM condition moderated the category-specific association between Perfectionistic Concerns and intermediate dwell time that was supported in Study 1, remained supported after controlling for depressive and anxiety symptoms, and was also observed at T1 in the Study 2 sample. The analysis therefore provides a targeted process-verification test
+rather than an additional manipulation check or a conventional mediation test.
+
+Post-ABM intermediate dwell time was modeled conditional on centered pre-ABM intermediate dwell time. The reduced model included the two-way associations among semantic category, Perfectionistic Concerns, and ABM condition, together
+with the same fixed covariates, random-effects structure, and dispersion submodel used in the corresponding manipulation check. The full model added the targeted three-way interaction among the negative-versus-neutral category comparison, Perfectionistic Concerns, and ABM condition. 
+
+The models were compared using a likelihood-ratio test. Because this omnibus comparison is the process-verification test, individual higher-order coefficients are not interpreted when the full model does not improve fit.
+
+```{r secondary_process_verification_study2}
+process_mc_et2 <- mc_et2 %>%
+  mutate(
+    IA_Negative_vs_Neutral = as.numeric(IA_LABEL_f == "Negative")
+  )
+
+process_intermediate_reduced <- glmmTMB(
+  dwell_time_intermediate_2_t01 ~ dwell_time_intermediate_1_c +
+    IA_LABEL_f * Perf_Concerns_c + IA_LABEL_f * Condition +
+    Perf_Concerns_c * Condition + block_nr_c + Change_category01 +
+    # (1 | block_id) +
+    (1 + Change_category01 || subject_id_2),
+  REML = FALSE,
+  family = beta_family(link = "logit"),
+  dispformula = ~ guessed_block_rule_2,
+  data = process_mc_et2,
+  na.action = na.omit
+)
+
+process_intermediate_full <- update(
+  process_intermediate_reduced,
+  . ~ . + IA_Negative_vs_Neutral:Perf_Concerns_c:Condition
+)
+
+summary(process_intermediate_full)
+anova(process_intermediate_reduced, process_intermediate_full)
+```
+
+The targeted three-way interaction did not significantly improve model fit.
+Accordingly, the individual higher-order coefficients were not interpreted, and this analysis did not provide evidence that ABM condition modified the negative-versus-neutral intermediate-dwell-time association with
+Perfectionistic Concerns.
+
 # Reference
 
 Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg, C. W., Nielsen, A., Skaug, H. J., Mächler, M., & Bolker, B. M. (2017). glmmTMB balances speed and flexibility among packages for zero-inflated generalized linear mixed modeling. *The R Journal, 9*(2), 378–400. <https://doi.org/10.32614/RJ-2017-066>

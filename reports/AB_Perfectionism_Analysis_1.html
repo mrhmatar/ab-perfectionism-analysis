@@ -11,7 +11,7 @@
 
 <meta name="author" content="MM" />
 
-<meta name="date" content="2026-09-14" />
+<meta name="date" content="2026-09-16" />
 
 <title>Appendix A</title>
 
@@ -441,7 +441,7 @@ display: none;
 <h1 class="title toc-ignore">Appendix A</h1>
 <h3 class="subtitle">Study 1 - Attention Bias Measurement</h3>
 <h4 class="author">MM</h4>
-<h4 class="date">2026-09-14</h4>
+<h4 class="date">2026-09-16</h4>
 
 </div>
 
@@ -844,7 +844,61 @@ alphaPerf_Concerns &lt;- psych::alpha(qu_task[, c(&quot;ZCM&quot;, &quot;ZDA&quo
 alphaGAD7 &lt;- psych::alpha(qu_task[, paste0(&quot;GAD7_&quot;, 1:7)])
 alphaCESD &lt;- psych::alpha(qu_task[, paste0(&quot;CESD_&quot;, 1:20)])
 
-round(psych::describe(qu_task[c(
+# Print reliability estimates for the final participant-level analytic sample.
+alpha_results &lt;- list(
+  &quot;HMPS SOP&quot; = alphaSOP, &quot;HMPS OOP&quot; = alphaOOP, &quot;HMPS SPP&quot; = alphaSPP,
+  &quot;FMPS PS&quot; = alphaPS, &quot;FMPS PE&quot; = alphaPE, &quot;FMPS PC&quot; = alphaPC,
+  &quot;FMPS CM&quot; = alphaCM, &quot;FMPS DA&quot; = alphaDA, &quot;FMPS O&quot; = alphaO,
+  &quot;CES-D&quot; = alphaCESD, &quot;GAD-7&quot; = alphaGAD7,
+  &quot;Strivings (subscale scores)&quot; = alphaPerf_Strivings,
+  &quot;Concerns (subscale scores)&quot; = alphaPerf_Concerns
+)
+alpha_table &lt;- do.call(rbind, lapply(names(alpha_results), function(scale_name) {
+  result &lt;- alpha_results[[scale_name]]
+  data.frame(
+    Scale = scale_name,
+    Sample_N = nrow(qu_task),
+    Items_or_subscales = nrow(result$item.stats),
+    Minimum_item_N = min(result$item.stats$n),
+    Maximum_item_N = max(result$item.stats$n),
+    Raw_alpha = result$total$raw_alpha,
+    Standardized_alpha = result$total$std.alpha,
+    check.names = FALSE
+  )
+}))
+cat(&quot;\nCronbach&#39;s alpha: final analytic sample (Study 1)\n&quot;)</code></pre>
+<pre><code>## 
+## Cronbach&#39;s alpha: final analytic sample (Study 1)</code></pre>
+<pre class="r"><code>print(alpha_table, row.names = FALSE, digits = 6)</code></pre>
+<pre><code>##                        Scale Sample_N Items_or_subscales Minimum_item_N
+##                     HMPS SOP      202                 15            202
+##                     HMPS OOP      202                 15            202
+##                     HMPS SPP      202                 15            202
+##                      FMPS PS      202                  7            202
+##                      FMPS PE      202                  5            202
+##                      FMPS PC      202                  4            202
+##                      FMPS CM      202                  9            202
+##                      FMPS DA      202                  4            202
+##                       FMPS O      202                  6            202
+##                        CES-D      202                 20            202
+##                        GAD-7      202                  7            202
+##  Strivings (subscale scores)      202                  2            202
+##   Concerns (subscale scores)      202                  3            202
+##  Maximum_item_N Raw_alpha Standardized_alpha
+##             202  0.910760           0.908332
+##             202  0.791484           0.795985
+##             202  0.880763           0.884389
+##             202  0.779672           0.782351
+##             202  0.864216           0.865007
+##             202  0.798414           0.797738
+##             202  0.875242           0.872922
+##             202  0.714739           0.717549
+##             202  0.890411           0.894698
+##             202  0.906807           0.904871
+##             202  0.908989           0.906946
+##             202  0.850213           0.850268
+##             202  0.718340           0.718352</code></pre>
+<pre class="r"><code>round(psych::describe(qu_task[c(
   &quot;SOP&quot;, &quot;OOP&quot;, &quot;SPP&quot;, &quot;PS&quot;, &quot;PE&quot;, &quot;PC&quot;, &quot;CM&quot;, &quot;DA&quot;, &quot;O&quot;,
   &quot;Perf_Strivings&quot;, &quot;Perf_Concerns&quot;, &quot;GAD7&quot;, &quot;CESD&quot;
 )]), 2)</code></pre>

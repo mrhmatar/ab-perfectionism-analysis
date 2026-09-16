@@ -231,7 +231,7 @@ qu2$Perf_Concerns  <- rowSums(qu2[, c("ZCM", "ZDA", "ZSPP")])
 
 Positive and negative emotion scores were computed as sums of the corresponding VAMS items at each assessment. The primary analyses operationalized emotional reactivity using post-assessment mood conditional on the corresponding score at the immediately preceding assessment: post-ABM mood was adjusted for pre-ABM mood, and post-Tangram mood was adjusted for mood immediately before the Tangram task.
 
-Questionnaire descriptives, correlations, and reliability estimates are
+Questionnaire descriptives and correlations are
 calculated below after identifying the common attention-task analytic sample.
 
 ## Attention Bias Measurement

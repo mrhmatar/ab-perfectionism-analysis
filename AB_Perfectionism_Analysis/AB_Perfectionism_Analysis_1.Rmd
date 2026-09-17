@@ -427,15 +427,51 @@ message("Study 1 task-completer questionnaire sample: N = ", nrow(qu_task))
 ```
 
 ```{r sample_demographics_study1}
-round(psych::describe(qu_task$Age), 2)
-table(qu_task$Sexe, useNA = "ifany")
-table(qu_task$Genre, useNA = "ifany")
-table(qu_task$Actual_Studies, useNA = "ifany")
-table(qu_task$Mother_Tongue, useNA = "ifany")
+s1_desc_n <- nrow(qu_task)
+s1_desc_fmt <- function(x, digits = 2L) {
+  ifelse(is.finite(x), formatC(x, format = "f", digits = digits), "--")
+}
+s1_desc_categories <- function(x, heading, mapping) {
+  x <- trimws(as.character(x))
+  x[is.na(x) | x == ""] <- "Missing"
+  matched <- match(x, names(mapping))
+  x[!is.na(matched)] <- unname(mapping[matched[!is.na(matched)]])
+  # Preserve any unexpected observed categories rather than silently dropping them.
+  order <- unique(c(unname(mapping), sort(setdiff(x, c(unname(mapping), "Missing"))), "Missing"))
+  counts <- table(factor(x, levels = order))
+  counts <- counts[counts > 0L]
+  data.frame(Characteristic = c(heading, paste0("  ", names(counts))),
+             Value = c("", sprintf("%d (%.1f%%)", as.integer(counts),
+                                    100 * as.integer(counts) / s1_desc_n)),
+             check.names = FALSE)
+}
+s1_desc_age <- psych::describe(qu_task$Age)
+s1_table11 <- rbind(
+  data.frame(Characteristic = "Age, M (SD)",
+             Value = paste0(s1_desc_fmt(s1_desc_age$mean), " (",
+                            s1_desc_fmt(s1_desc_age$sd), ")")),
+  s1_desc_categories(qu_task$Sexe, "Sex assigned at birth",
+                     c("Femme" = "Female", "Homme" = "Male")),
+  s1_desc_categories(qu_task$Actual_Studies, "Education level",
+    c("Secondaires" = "Secondary", "BAC I" = "Bachelor 1", "BAC II" = "Bachelor 2",
+      "BAC III" = "Bachelor 3", "BAC IV" = "Bachelor 4", "Master I" = "Master 1",
+      "Master II" = "Master 2", "Master 60 complémentaire" = "Complementary 60-credit master's",
+      "Doctorat" = "Doctorate")),
+  s1_desc_categories(qu_task$Mother_Tongue, "Native language", c("Français" = "French"))
+)
+knitr::kable(s1_table11, row.names = FALSE, align = c("l", "r"),
+  caption = paste0("Table 1.1. Demographic Characteristics of the Study 1 Sample (N = ", s1_desc_n, ")."))
 ```
 
 
-**Questionnaires** 
+*Note.* Percentages use the full analytic sample (N = `r s1_desc_n`); missing
+responses are reported where present. Age uses available observations
+(n = `r s1_desc_age$n`).
+
+**Questionnaires**
+
+Table 1.2 reports self-report descriptives calculated from the final analytic
+sample. Reliability calculations are retained below. 
 
 ```{r reliability_questionnaires_study1}
 alphaSOP <- psych::alpha(qu_task[, c("HMPS_1", "HMPS_6", "HMPS_8", "HMPS_12", "HMPS_14", "HMPS_15", "HMPS_17",
@@ -483,18 +519,56 @@ print(alpha_table, row.names = FALSE, digits = 6)
 
 
 ```{r descriptives_questionnaires_study1}
-round(psych::describe(qu_task[c(
-  "SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
-  "Perf_Strivings", "Perf_Concerns", "GAD7", "CESD"
-)]), 2)
+s1_desc_vars <- c("SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
+                   "Perf_Strivings", "Perf_Concerns", "GAD7", "CESD")
+s1_desc_labels <- c("Self-Oriented Perfectionism (SOP)", "Other-Oriented Perfectionism (OOP)",
+  "Socially Prescribed Perfectionism (SPP)", "Personal Standards (PS)",
+  "Parental Expectations (PE)", "Parental Criticism (PC)", "Concern Over Mistakes (CM)",
+  "Doubts About Actions (DA)", "Organization (O)", "Perfectionistic Strivings",
+  "Perfectionistic Concerns", "Anxiety (GAD-7)", "Depression (CES-D)")
+s1_desc_qu <- psych::describe(qu_task[s1_desc_vars])
+s1_table12 <- data.frame(Measure = s1_desc_labels,
+  M = s1_desc_qu$mean, SD = s1_desc_qu$sd, Skew = s1_desc_qu$skew,
+  Kurtosis = s1_desc_qu$kurtosis, Min = s1_desc_qu$min, Max = s1_desc_qu$max,
+  check.names = FALSE)
+knitr::kable(s1_table12, digits = 2, row.names = FALSE,
+  caption = "Table 1.2. Descriptive Statistics for Self-Report Measures.")
+```
 
+*Note.* `r if (length(unique(s1_desc_qu$n)) == 1L) paste0("N = ", s1_desc_qu$n[1], " for all measures.") else paste0("Available N ranges from ", min(s1_desc_qu$n), " to ", max(s1_desc_qu$n), " across measures.")`
+Skewness and kurtosis retain the existing `psych::describe` defaults.
+
+**Correlations**
+
+Table 1.3 displays correlations among the two perfectionism dimensions and
+anxiety/depressive symptoms. The original full correlation calculation is
+retained; only these four variables are displayed in the lower triangle.
+
+```{r correlations_table_study1}
 corr_table <- corr.test(qu_task[c("SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
                                   "Perf_Strivings", "Perf_Concerns", "GAD7", "CESD")])$stars
-print(corr_table)
+s1_corr_vars <- c("Perf_Strivings", "Perf_Concerns", "GAD7", "CESD")
+s1_corr_display <- corr_table[s1_corr_vars, s1_corr_vars, drop = FALSE]
+s1_corr_display[upper.tri(s1_corr_display)] <- ""
+diag(s1_corr_display) <- "—"
+s1_table13 <- data.frame(Variable = c("1. Perfectionistic Strivings", "2. Perfectionistic Concerns",
+                                      "3. Anxiety (GAD-7)", "4. Depression (CES-D)"),
+                          s1_corr_display, check.names = FALSE)
+names(s1_table13) <- c("Variable", "1", "2", "3", "4")
+knitr::kable(s1_table13, row.names = FALSE,
+  caption = "Table 1.3. Correlations Among Perfectionism Dimensions and Psychological Distress Measures.")
 ```
 
 
-**Response Time**
+*Note.* Analytic sample N = `r s1_desc_n`; correlations use available pairs.
+Significance markers are retained from the original lower triangle of
+`psych::corr.test`: *p* < .05 (one star), *p* < .01 (two stars), and
+*p* < .001 (three stars).
+
+**Attentional Measures**
+
+Table 1.4 summarizes the existing block-level eye-tracking observations and
+correct trial-level response times from the analytic sample.
 
 
 ```{r merge_rt_qu_study1, include=FALSE}
@@ -506,15 +580,9 @@ rt_qu <- rt[c("subject_id", "Change_category", "response_time", "block_id", "blo
              relationship = "many-to-many")
 ```
 
-```{r descriptives_rt_qu_study1}
 
-# response time
-round(describe(rt_qu$response_time),2)
-rt_qu[c("response_time", "Change_category")] %>% group_by(Change_category) %>% 
-  summarise(M = round(mean(response_time),2), SD = round(sd(response_time),2))
-```
 
-**Eye-tracking Indices**
+
 
 ```{r merge_et_qu_study1, include = FALSE}
 et_qu <- et %>%
@@ -528,28 +596,28 @@ et_qu <- et %>%
 
 
 ```{r descriptives_et_indices_study1}
-round(describe(et_qu[c("first_fix_prob", "first_fix_latency", "dwell_time",
-                       "dwell_time_early", "dwell_time_intermediate", "dwell_time_late")]), 2)
-
-et_qu[c("IA_LABEL", "first_fix_prob", "first_fix_latency", "dwell_time",
-        "dwell_time_early", "dwell_time_intermediate", "dwell_time_late")] %>%
-  group_by(IA_LABEL) %>%
-  summarise(
-    M_first_fix_prob = round(mean(first_fix_prob), 2),
-    SD_first_fix_prob = round(sd(first_fix_prob), 2),
-    M_first_fix_latency = round(mean(first_fix_latency), 2),
-    SD_first_fix_latency = round(sd(first_fix_latency), 2),
-    M_dwell_time = round(mean(dwell_time), 2),
-    SD_dwell_time = round(sd(dwell_time), 2),
-    M_dwell_time_early = round(mean(dwell_time_early), 2),
-    SD_dwell_time_early = round(sd(dwell_time_early), 2),
-    M_dwell_time_intermediate = round(mean(dwell_time_intermediate), 2),
-    SD_dwell_time_intermediate = round(sd(dwell_time_intermediate), 2),
-    M_dwell_time_late = round(mean(dwell_time_late), 2),
-    SD_dwell_time_late = round(sd(dwell_time_late), 2)
-  )
-
+# Preserve the existing observation-level summaries; N refers to participants.
+s1_desc_et_vars <- c("first_fix_prob", "first_fix_latency", "dwell_time",
+                     "dwell_time_early", "dwell_time_intermediate", "dwell_time_late")
+s1_desc_et <- psych::describe(et_qu[s1_desc_et_vars])
+s1_desc_rt <- psych::describe(rt_qu$response_time)
+s1_desc_attention <- rbind(as.data.frame(s1_desc_et)[, c("mean", "sd", "min", "max")],
+                           as.data.frame(s1_desc_rt)[, c("mean", "sd", "min", "max")])
+s1_table14 <- data.frame(Measure = c("Probability of First or Second Fixation",
+  "Latency to First Fixation", "Total Dwell Time", "Early Dwell Time",
+  "Intermediate Dwell Time", "Late Dwell Time", "Response Time (ms)"),
+  N = s1_desc_n, M = s1_desc_attention$mean, SD = s1_desc_attention$sd,
+  Min = s1_desc_attention$min, Max = s1_desc_attention$max, check.names = FALSE)
+knitr::kable(s1_table14, digits = c(0, 0, 2, 2, 2, 2), row.names = FALSE,
+  caption = "Table 1.4. Descriptive Statistics for Attentional Measures.")
 ```
+
+*Note.* N denotes the common analytic sample of participants. Eye-tracking
+means and standard deviations summarize block-level observations, and
+response-time descriptives summarize correct trial-level observations
+contributed by these participants. Eye-tracking indices are probabilities or
+proportions (including proportional latency); response times are milliseconds.
+Scores are summarized before model boundary adjustment.
 
 ## Distributional Inspection
 
@@ -652,16 +720,16 @@ Because Neutral was the reference category, the interaction coefficients in the 
 Because the attentional outcomes were proportions, these slopes indicated whether the share of attention allocated to a category changed as a function of perfectionism. Such a change necessarily reflected redistribution across the categories in the display, although a category-specific slope did not identify
 the categories against which that redistribution occurred. 
 
-Four planned comparisons among the slopes directly tested whether associations with perfectionism differed according to emotional valence, success versus failure, performance relevance, and non-neutral versus neutral content. More specifically, `emtrends()` first recovered the estimated perfectionism slope, denoted below by $s$, within each semantic category. `contrast()` then formed the following weighted combinations of those slopes:
+Four planned comparisons among the slopes directly tested whether associations with perfectionism differed according to positive versus negative, success versus failure, performance-irrelevant versus performance-relevant, and neutral versus non-neutral content. More specifically, `emtrends()` first recovered the estimated perfectionism slope, denoted below by $s$, within each semantic category. `contrast()` then formed the following weighted combinations of those slopes:
 
-- emotional valence: $(s_{Negative}+s_{Failure})-(s_{Positive}+s_{Success})$;
+- positive versus negative: $(s_{Negative}+s_{Failure})-(s_{Positive}+s_{Success})$;
 - success versus failure: $s_{Failure}-s_{Success}$;
-- performance relevance: $3(s_{Success}+s_{Failure})-
+- performance-irrelevant versus performance-relevant: $3(s_{Success}+s_{Failure})-
   2(s_{Neutral}+s_{Positive}+s_{Negative})$; and
-- non-neutral versus neutral content: $(s_{Positive}+s_{Negative}+
+- neutral versus non-neutral content: $(s_{Positive}+s_{Negative}+
   s_{Success}+s_{Failure})-4s_{Neutral}$.
 
-The integer weights below are scaled versions of differences between the corresponding category averages. For example, the performance-relevance contrast is six times the difference between the mean slope for the two performance-relevant categories and the mean slope for the three performance-irrelevant categories. Multiplying every weight in a contrast by the same positive constant changes the scale of its estimate and standard
+The integer weights below are scaled versions of differences between the corresponding category averages. For example, the performance-irrelevant versus performance-relevant contrast is six times the difference between the mean slope for the two performance-relevant categories and the mean slope for the three performance-irrelevant categories. Multiplying every weight in a contrast by the same positive constant changes the scale of its estimate and standard
 error, but not its test statistic or *p* value. 
 
 Thus, the planned tests assess whether the perfectionism slopes differ across the theoretically defined sets of categories; the separate `emtrends()` tests assess whether the slope within
@@ -678,22 +746,22 @@ stopifnot(levels(rt_qu$Change_category_f)[1] == "Neutral")
 
 # Planned comparisons among factor levels for emmeans follow-ups. Each vector
 # is explicitly named to show the category mapping and uses the agreed integer
-# coding. Positive estimates follow the direction described in each comment.
+# coding. The comments below identify the comparison names.
 semantic_planned <- list(
-  # Negative minus positive, irrespective of performance relevance
+  # Positive versus negative, irrespective of performance relevance
   positive_vs_negative = c(
     Neutral = 0, Positive = -1, Negative = 1, Success = -1, Failure = 1
   ),
-  # Failure minus success
-  Success_Failure = c(
+  # Success versus failure
+  success_vs_failure = c(
     Neutral = 0, Positive = 0, Negative = 0, Success = -1, Failure = 1
   ),
-  # Performance-relevant minus performance-irrelevant
+  # Performance-irrelevant versus performance-relevant
   performance_irrelevant_vs_relevant = c(
     Neutral = -2, Positive = -2, Negative = -2, Success = 3, Failure = 3
   ),
-  # All non-neutral categories minus Neutral
-  NonNeutral_vs_Neutral = c(
+  # Neutral versus non-neutral
+  neutral_vs_nonneutral = c(
     Neutral = -4, Positive = 1, Negative = 1, Success = 1, Failure = 1
   )
 )
@@ -710,15 +778,15 @@ semantic_colors <- c(
   Success = "#009E73", Failure = "#CC79A7"
 )
 contrast_colors <- c(
-  positive_vs_negative = "#0072B2", Success_Failure = "#D55E00",
+  positive_vs_negative = "#0072B2", success_vs_failure = "#D55E00",
   performance_irrelevant_vs_relevant = "#009E73",
-  NonNeutral_vs_Neutral = "#CC79A7"
+  neutral_vs_nonneutral = "#CC79A7"
 )
 contrast_labels <- c(
   positive_vs_negative = "Positive vs. negative",
-  Success_Failure = "Success vs. failure",
-  performance_irrelevant_vs_relevant = "Performance-irrelevant\nvs. relevant",
-  NonNeutral_vs_Neutral = "Non-neutral vs. neutral"
+  success_vs_failure = "Success vs. failure",
+  performance_irrelevant_vs_relevant = "Performance-irrelevant\nvs. performance-relevant",
+  neutral_vs_nonneutral = "Neutral vs. non-neutral"
 )
 
 # Enlarged source typography remains legible after two plots are combined.

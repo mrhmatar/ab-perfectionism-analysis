@@ -53,7 +53,7 @@ This section documents the main preprocessing steps used to derive the variables
 
 Perfectionism was assessed using the Hewitt and Flett Multidimensional Perfectionism Scale (HMPS) and the Frost Multidimensional Perfectionism Scale (FMPS). As in Study 1, item scoring, reverse coding, and computation of questionnaire totals followed the standard scoring procedures for each instrument.
 
-Psychological distress was assessed repeatedly using seven Visual Analog Mood Scales (VAMS; 0–9). In line with the manuscript, these items were aggregated into Positive Mood (happy, excited, positive mood) and Negative Mood (sad, anxious, angry, negative mood) scores. Baseline depressive and anxiety symptoms were assessed using the CES-D and GAD-7 and were retained as control variables.
+Momentary positive and negative mood/emotional states were assessed repeatedly using seven Visual Analog Mood Scales (VAMS; 0–9). In line with the manuscript, these items were aggregated into Positive Mood (happy, excited, positive mood) and Negative Mood (sad, anxious, angry, negative mood) scores. Baseline depressive and anxiety symptoms were assessed using the CES-D and GAD-7 and were retained as baseline symptom control variables, not as focal outcomes.
 
 ```{r read_data_questionnaires_study2, include=FALSE}
 # Read data
@@ -514,39 +514,70 @@ table(qu2$Actual_Studies, useNA = "ifany")
 table(qu2$Mother_Tongue, useNA = "ifany")
 ```
 
-**Questionnaires**
+**Participant characteristics and mood by condition**
+
+Table 2.1 presents observed participant-level M (SD) in the final analytic
+sample. CES-D and GAD-7 are baseline depressive/anxiety symptom control
+measures. VAMS scores describe momentary mood. VAMS 2 is pre-ABM, VAMS 3
+is the shared post-ABM/pre-Tangram assessment, and VAMS 4 is post-Tangram;
+the shared assessment is reported once, following the existing analysis coding.
 
 ```{r descriptives_questionnaires_study2}
-round(psych::describe(qu2[c(
-  "SOP", "OOP", "SPP", "PS", "PE", "PC", "CM", "DA", "O",
-  "Perf_Strivings", "Perf_Concerns", "CESD", "GAD7",
-  "POS_1", "NEG_1", "POS_2", "NEG_2", "POS_3", "NEG_3",
-  "POS_4", "NEG_4"
-)]), 2)
-
-corr_table <- corr.test(qu2[c("Perf_Strivings", "Perf_Concerns",
-                              "POS_2", "NEG_2", "POS_3", "NEG_3",
-                              "POS_4", "NEG_4", "CESD", "GAD7")])$stars
-print(corr_table)
+# Descriptive-only objects; leave analysis datasets and factor coding unchanged.
+s2_desc_conditions <- c("Control", "Success", "Failure")
+s2_desc_labels <- c("Control", "Success-oriented", "Failure-oriented")
+s2_desc_categories <- c("Neutral", "Positive", "Negative", "Success", "Failure")
+s2_desc_mean <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x)) mean(x) else NA_real_
+}
+s2_desc_msd <- function(x, digits = 2L) {
+  x <- x[is.finite(x)]
+  if (!length(x)) return("--")
+  m <- formatC(mean(x), format = "f", digits = digits)
+  s <- if (length(x) > 1L) formatC(sd(x), format = "f", digits = digits) else "--"
+  paste0(m, " (", s, ")")
+}
+stopifnot(!anyNA(qu2$Condition),
+          all(as.character(qu2$Condition) %in% s2_desc_conditions))
+s2_desc_n <- vapply(s2_desc_conditions, function(g) {
+  sum(as.character(qu2$Condition) == g)
+}, integer(1))
+s2_desc_vars <- c("Perf_Strivings", "Perf_Concerns", "CESD", "GAD7",
+                  "POS_2", "NEG_2", "POS_3", "NEG_3", "POS_4", "NEG_4")
+s2_table21 <- data.frame(Measure = c(
+  "Perfectionistic Strivings", "Perfectionistic Concerns",
+  "CES-D depressive symptoms (control measure)",
+  "GAD-7 anxiety symptoms (control measure)",
+  "Positive mood: pre-ABM", "Negative mood: pre-ABM",
+  "Positive mood: post-ABM / pre-Tangram", "Negative mood: post-ABM / pre-Tangram",
+  "Positive mood: post-Tangram", "Negative mood: post-Tangram"
+), check.names = FALSE)
+for (j in seq_along(s2_desc_conditions)) {
+  s2_desc_rows <- as.character(qu2$Condition) == s2_desc_conditions[j]
+  s2_table21[[paste0(s2_desc_labels[j], " (n = ", s2_desc_n[j], ")")]] <-
+    vapply(s2_desc_vars, function(v) s2_desc_msd(qu2[[v]][s2_desc_rows]), character(1))
+}
+knitr::kable(s2_table21, row.names = FALSE,
+  caption = "Table 2.1. Participant characteristics and momentary mood by ABM condition: M (SD).")
 ```
 
-**Response Time**
+*Note.* Condition n denotes the full analytic group; each cell uses available
+finite observations. Perfectionism dimensions retain their existing sums of
+standardized subscale scores. Positive/negative mood are VAMS item sums
+(range 0-27/0-36). A dash denotes an unavailable mean or SD.
 
-```{r descriptives_rt_study2}
-round(psych::describe(rt_qu2[c("response_time_1", "response_time_2")]), 2)
+**Task and attention descriptives by condition and assessment**
 
-rt_qu2 %>%
-  group_by(Change_category) %>%
-  summarise(
-    M_response_time_1 = round(mean(response_time_1, na.rm = TRUE), 2),
-    SD_response_time_1 = round(sd(response_time_1, na.rm = TRUE), 2),
-    M_response_time_2 = round(mean(response_time_2, na.rm = TRUE), 2),
-    SD_response_time_2 = round(sd(response_time_2, na.rm = TRUE), 2),
-    .groups = "drop"
-  )
-```
-
-**Eye-Tracking Indices**
+Table 2.2 reports observed scores before model boundary adjustment. For each
+participant, eye-tracking indices are averaged across retained paired blocks
+within AOI category, and RTs across retained paired trials within changed-word
+category, retaining the existing correct-trial and minimum-RT exclusions.
+The table then reports M (SD) across participant means, giving participants
+equal weight within each cell. Accuracy and rule awareness retain their
+existing definitions: numbers of correct trials and blocks with awareness,
+respectively, across all categories. No inferential tests, change scores, or
+model-estimated means are included.
 
 ```{r merge_et_qu_study2, include=FALSE}
 et_qu2 <- et %>%
@@ -560,14 +591,122 @@ et_qu2 <- et %>%
   )
 ```
 
+```{r descriptives_response_accuracy_study2, include=FALSE}
+accuracy <- correct_responses %>% group_by(subject_id, Temps_de_mesure) %>% summarize(correct_response = sum(correct_response))
 
-```{r descriptives_et_indices_study2}
-round(describe(et_qu2[c("first_fix_prob_1", "first_fix_latency_1", "dwell_time_1",
-                        "dwell_time_early_1", "dwell_time_intermediate_1", "dwell_time_late_1")]), 2)
-
-round(describe(et_qu2[c("first_fix_prob_2", "first_fix_latency_2", "dwell_time_2",
-                        "dwell_time_early_2", "dwell_time_intermediate_2", "dwell_time_late_2")]), 2)
+accuracy_1 <- accuracy$correct_response[accuracy$Temps_de_mesure == "T1"]
+accuracy_2 <- accuracy$correct_response[accuracy$Temps_de_mesure == "T2"]
 ```
+
+```{r descriptives_rule_awareness_study2, include=FALSE}
+rule_awareness <- rt2 %>%
+  group_by(subject_id, block_id, block_nr, Temps_de_mesure) %>%
+  summarise(guessed_block_rule = mean(as.numeric(as.character(guessed_block_rule))), .groups = "drop") %>%
+  group_by(subject_id, Temps_de_mesure) %>%
+  summarise(guessed_block_rule = sum(guessed_block_rule), .groups = "drop")
+
+rule_awareness_1 <- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == "T1"]
+rule_awareness_2 <- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == "T2"]
+```
+
+```{r descriptives_task_attention_by_condition_study2}
+# Session IDs may differ between assessments: use both keys for condition lookup.
+s2_desc_lookup <- rt2 %>%
+  distinct(subject_id, Temps_de_mesure, ID = Code) %>%
+  inner_join(qu2 %>% select(ID, Condition), by = "ID", relationship = "many-to-one")
+stopifnot(!anyDuplicated(s2_desc_lookup[c("subject_id", "Temps_de_mesure")]))
+s2_desc_accuracy <- accuracy %>%
+  inner_join(s2_desc_lookup, by = c("subject_id", "Temps_de_mesure"),
+             relationship = "one-to-one")
+s2_desc_awareness <- rule_awareness %>%
+  inner_join(s2_desc_lookup, by = c("subject_id", "Temps_de_mesure"),
+             relationship = "one-to-one")
+s2_desc_et_vars <- c("first_fix_prob", "first_fix_latency", "dwell_time_early",
+                     "dwell_time_intermediate", "dwell_time_late", "dwell_time")
+s2_desc_et_labels <- c("First-or-second fixation probability",
+                       "First-fixation latency (proportion)",
+                       "Early dwell (proportion)", "Intermediate dwell (proportion)",
+                       "Late dwell (proportion)", "Whole-trial dwell (proportion)")
+stopifnot(all(as.character(et_qu2$IA_LABEL) %in% s2_desc_categories),
+          all(as.character(rt_qu2$Change_category) %in% s2_desc_categories))
+s2_desc_parts <- list()
+for (t in 1:2) {
+  s2_desc_time <- paste0("T", t)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] <- s2_desc_accuracy %>%
+    filter(Temps_de_mesure == s2_desc_time) %>%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = "Change-detection accuracy (correct trials)",
+              Category = "All categories", Value = correct_response)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] <- s2_desc_awareness %>%
+    filter(Temps_de_mesure == s2_desc_time) %>%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = "Rule awareness (blocks)",
+              Category = "All categories", Value = guessed_block_rule)
+  for (j in seq_along(s2_desc_et_vars)) {
+    s2_desc_column <- paste0(s2_desc_et_vars[j], "_", t)
+    s2_desc_parts[[length(s2_desc_parts) + 1L]] <- et_qu2 %>%
+      group_by(ID, Condition, IA_LABEL) %>%
+      summarise(Value = s2_desc_mean(.data[[s2_desc_column]]), .groups = "drop") %>%
+      transmute(ID, Condition, Assessment = s2_desc_time,
+                Measure = s2_desc_et_labels[j], Category = as.character(IA_LABEL), Value)
+  }
+  s2_desc_column <- paste0("response_time_", t)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] <- rt_qu2 %>%
+    group_by(ID, Condition, Change_category) %>%
+    summarise(Value = s2_desc_mean(.data[[s2_desc_column]]), .groups = "drop") %>%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = "Response time (ms)", Category = as.character(Change_category), Value)
+}
+s2_desc_values <- bind_rows(s2_desc_parts)
+s2_table22 <- data.frame(
+  Measure = c("Change-detection accuracy (correct trials)", "Rule awareness (blocks)",
+              rep(c(s2_desc_et_labels, "Response time (ms)"), each = 5L)),
+  Category = c(rep("All categories", 2L), rep(s2_desc_categories, 7L)),
+  check.names = FALSE
+)
+for (t in 1:2) {
+  for (j in seq_along(s2_desc_conditions)) {
+    s2_desc_cells <- s2_desc_values %>%
+      filter(Assessment == paste0("T", t), Condition == s2_desc_conditions[j])
+    s2_desc_heading <- paste0(c("Pre-ABM", "Post-ABM")[t], ": ", s2_desc_labels[j])
+    s2_table22[[s2_desc_heading]] <- vapply(seq_len(nrow(s2_table22)), function(i) {
+      x <- s2_desc_cells$Value[s2_desc_cells$Measure == s2_table22$Measure[i] &
+                               s2_desc_cells$Category == s2_table22$Category[i]]
+      s2_desc_msd(x, digits = if (s2_table22$Measure[i] %in% s2_desc_et_labels) 3L else 2L)
+    }, character(1))
+  }
+}
+knitr::kable(s2_table22, row.names = FALSE,
+  caption = "Table 2.2. Task and attention descriptives by ABM condition, assessment, and semantic category: M (SD).")
+```
+
+*Note.* SDs describe between-participant variation. Cells use available finite
+participant summaries and may have fewer observations than the condition n in
+Table 2.1. Eye-tracking categories refer to the viewed AOI; RT categories refer
+to the changed word. Eye-tracking indices retain their original probability/
+proportion scales. Proportional latency is the category block-mean latency
+divided by the sum of category block-mean latencies, not latency in milliseconds.
+Dwell windows are early (500-1500 ms), intermediate (1500-3500 ms), late
+(3500-5500 ms), and whole trial (500-5500 ms). RTs are in milliseconds.
+A dash denotes an unavailable mean or SD.
+
+**Correlations**
+
+Table 2.3 retains the existing pooled correlation matrix, variable order, and
+significance-star calculation for the final analytic sample.
+
+```{r correlations_study2}
+corr_table <- corr.test(qu2[c("Perf_Strivings", "Perf_Concerns",
+                              "POS_2", "NEG_2", "POS_3", "NEG_3",
+                              "POS_4", "NEG_4", "CESD", "GAD7")])$stars
+knitr::kable(corr_table, row.names = TRUE,
+  caption = "Table 2.3. Correlations among perfectionism, momentary mood, and baseline symptom control measures.")
+```
+
+*Note.* POS/NEG denote positive/negative mood; suffixes 2, 3, and 4 denote
+pre-ABM, post-ABM/pre-Tangram, and post-Tangram, respectively. CESD and GAD7
+are baseline depressive and anxiety symptom control measures. Correlation values
+and significance markers retain the original `psych::corr.test` defaults.
 
 **Tangram Performance**
 
@@ -577,37 +716,6 @@ Tangram performance was operationalized as the number of correctly completed puz
 round(psych::describe(qu2$Tangrams), 2)
 ```
 
-**Response Accuracy**
-
-Response accuracy was defined as the number of trials in which the changed word was correctly identified. Descriptive statistics were computed separately for the pre-ABM (t1) and post-ABM (t2) assessments.
-
-```{r descriptives_response_accuracy_study2}
-accuracy <- correct_responses %>% group_by(subject_id, Temps_de_mesure) %>% summarize(correct_response = sum(correct_response))
-
-accuracy_1 <- accuracy$correct_response[accuracy$Temps_de_mesure == "T1"]
-accuracy_2 <- accuracy$correct_response[accuracy$Temps_de_mesure == "T2"]
-
-describe(accuracy_1)
-describe(accuracy_2)
-```
-
-**Rule Awareness**
-
-Rule awareness was assessed at the end of each block and coded as a binary variable (0 = no, 1 = yes). For descriptive purposes, block-level responses were summed within time point, yielding the number of blocks in which participants reported awareness of the rule at t1 and t2.
-
-```{r descriptives_rule_awareness_study2}
-rule_awareness <- rt2 %>%
-  group_by(subject_id, block_id, block_nr, Temps_de_mesure) %>%
-  summarise(guessed_block_rule = mean(as.numeric(as.character(guessed_block_rule))), .groups = "drop") %>%
-  group_by(subject_id, Temps_de_mesure) %>%
-  summarise(guessed_block_rule = sum(guessed_block_rule), .groups = "drop")
-
-rule_awareness_1 <- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == "T1"]
-rule_awareness_2 <- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == "T2"]
-
-round(describe(rule_awareness_1), 2)
-round(describe(rule_awareness_2), 2)
-```
 
 ## Distributional Inspection
 
@@ -718,8 +826,8 @@ Semantic category was represented as the same five-level factor used in Study 1,
 with Neutral specified as the reference category. For response-time models,
 semantic category referred to the changed word; for eye-tracking models, it
 referred to the AOI category. Planned `emmeans` comparisons tested emotional
-valence, success versus failure, performance relevance, and non-neutral versus
-neutral content following a supported omnibus interaction.
+valence (positive versus negative), success versus failure, performance-irrelevant versus performance-relevant, and neutral versus
+non-neutral content following a supported omnibus interaction.
 
 ```{r semantic_class_rt_study2}
 semantic_levels <- c("Neutral", "Positive", "Negative", "Success", "Failure")
@@ -733,20 +841,20 @@ stopifnot(levels(rt_qu2$Change_category_f)[1] == "Neutral")
 # Planned comparisons among factor levels. Each vector is explicitly named to
 # show the category mapping and uses the agreed integer coding.
 semantic_planned <- list(
-  # Negative minus positive, irrespective of performance relevance
+  # Positive versus negative, irrespective of performance relevance
   positive_vs_negative = c(
     Neutral = 0, Positive = -1, Negative = 1, Success = -1, Failure = 1
   ),
-  # Failure minus success
-  Success_Failure = c(
+  # Success versus failure
+  success_vs_failure = c(
     Neutral = 0, Positive = 0, Negative = 0, Success = -1, Failure = 1
   ),
-  # Performance-relevant minus performance-irrelevant
+  # Performance-irrelevant versus performance-relevant
   performance_irrelevant_vs_relevant = c(
     Neutral = -2, Positive = -2, Negative = -2, Success = 3, Failure = 3
   ),
-  # All non-neutral categories minus Neutral
-  NonNeutral_vs_Neutral = c(
+  # Neutral versus non-neutral
+  neutral_vs_nonneutral = c(
     Neutral = -4, Positive = 1, Negative = 1, Success = 1, Failure = 1
   )
 )
@@ -854,7 +962,7 @@ Response accuracy remained stable from T1 to T2, whereas rule awareness increase
 
 ## Group Equivalence
 
-One-way ANOVAs were conducted to assess equivalence across ABM conditions for task performance, perfectionism, and baseline psychological distress.
+One-way ANOVAs were conducted to assess equivalence across ABM conditions for task performance, perfectionism, and baseline depressive and anxiety symptoms.
 
 ```{r group_equivalence_study2}
 # Tangram performance
@@ -868,7 +976,7 @@ anova(fit_Strivings)
 fit_Concerns <- lm(Perf_Concerns ~ Condition, data = qu2)
 anova(fit_Concerns)
 
-# Baseline distress
+# Baseline depressive and anxiety symptom control variables
 fit_Depression <- lm(CESD ~ Condition, data = qu2)
 anova(fit_Depression)
 
@@ -1449,6 +1557,69 @@ for (model_name in names(family_comparison_models)) {
 }
 ```
 
+### Decomposing the retained interaction
+
+The retained post-Tangram negative-mood Tweedie model was refitted with Failure and then Success as the reference condition. These refits retain the same complete-case sample, predictors, Tweedie family, and log link. The `Perf_Strivings_c` coefficient tests the Strivings slope within the reference condition: Control in the original model, Failure in the first refit, and Success in the second. Interaction coefficients test differences between condition-specific slopes. Slopes are expressed on the log scale and are interpreted separately from the supported between-condition interaction.
+
+```{r post_tangram_negative_failure_reference_study2}
+mood_negative_cc_failure <- mood_negative_cc
+mood_negative_cc_failure$Condition <- relevel(
+  mood_negative_cc_failure$Condition, ref = "Failure"
+)
+
+glm1.2_negative_failure_ref <- update(
+  glm1.2_negative,
+  data = mood_negative_cc_failure
+)
+summary(glm1.2_negative_failure_ref)
+```
+
+```{r post_tangram_negative_success_reference_study2}
+mood_negative_cc_success <- mood_negative_cc
+mood_negative_cc_success$Condition <- relevel(
+  mood_negative_cc_success$Condition, ref = "Success"
+)
+
+glm1.2_negative_success_ref <- update(
+  glm1.2_negative,
+  data = mood_negative_cc_success
+)
+summary(glm1.2_negative_success_ref)
+```
+
+The following table reports each condition-specific Strivings slope, its standard error, Wald 95% confidence interval, and unadjusted two-sided p value.
+
+```{r post_tangram_negative_strivings_slopes_study2}
+negative_mood_reference_models <- list(
+  Control = glm1.2_negative,
+  Failure = glm1.2_negative_failure_ref,
+  Success = glm1.2_negative_success_ref
+)
+
+stopifnot(all(vapply(negative_mood_reference_models, nobs, numeric(1)) ==
+                nrow(mood_negative_cc)))
+
+negative_mood_strivings_slopes <- do.call(
+  rbind,
+  lapply(names(negative_mood_reference_models), function(condition_name) {
+    model <- negative_mood_reference_models[[condition_name]]
+    coefficient <- summary(model)$coefficients$cond["Perf_Strivings_c", ]
+    data.frame(
+      Condition = condition_name,
+      estimate = unname(coefficient["Estimate"]),
+      SE = unname(coefficient["Std. Error"]),
+      lower.CL = unname(coefficient["Estimate"] -
+                         qnorm(0.975) * coefficient["Std. Error"]),
+      upper.CL = unname(coefficient["Estimate"] +
+                         qnorm(0.975) * coefficient["Std. Error"]),
+      z = unname(coefficient["z value"]),
+      p.value = unname(coefficient["Pr(>|z|)"])
+    )
+  })
+)
+negative_mood_strivings_slopes
+```
+
 ### Distributional Model Diagnostics
 
 The following plots examine residual patterns from the best-supported nested model for each mood outcome and interval. Both positive-mood models and the post-ABM negative-mood model use the Gaussian family; the post-Tangram negative-mood model uses the Tweedie family. The full interaction model is used only when it significantly improves fit over its reduced counterpart.
@@ -1493,7 +1664,7 @@ for (model_name in names(mood_diagnostic_models)) {
 
 **Interaction plots**
 
-Only interactions meeting both criteria--a significant omnibus model comparison and a significant individual interaction--are plotted. In the current results, this rule supports plotting the interaction of Perfectionistic Strivings with ABM condition for post-Tangram negative mood only. All lines are solid; the failure-condition line is thicker and shown at full opacity because the Strivings-by-Failure versus Control coefficient was significant, whereas the control and success lines are thinner and lighter. This visual emphasis does not imply that the within-condition Strivings slope was separately tested or significant.
+Only interactions meeting both criteria--a significant omnibus model comparison and a significant individual interaction--are plotted. In the current results, this rule supports plotting the interaction of Perfectionistic Strivings with ABM condition for post-Tangram negative mood only. All lines are solid; the failure-condition line is thicker and shown at full opacity because the Strivings-by-Failure versus Control coefficient was significant, whereas the control and success lines are thinner and lighter. This visual emphasis reflects the between-condition interaction; the condition-specific Strivings slope tests are reported separately above.
 
 ```{r lm1.2_interaction_plot_study2, fig.width=7, fig.height=4}
 pred_neg_ps <- ggpredict(

@@ -1379,21 +1379,20 @@ late_dwell_concerns_slopes <- emtrends(
 )
 summary(late_dwell_concerns_slopes, infer = c(TRUE, TRUE))
 # IA_LABEL_f Perf_Concerns_c.trend     SE  df asymp.LCL asymp.UCL z.ratio p.value
-#  Neutral                  -0.0307 0.0152 Inf   -0.0605 -0.000878  -2.018  0.0436
-#  Positive                 -0.0468 0.0153 Inf   -0.0767 -0.016923  -3.069  0.0021
-#  Negative                 -0.0428 0.0152 Inf   -0.0726 -0.012991  -2.814  0.0049
-#  Success                  -0.0386 0.0152 Inf   -0.0684 -0.008797  -2.538  0.0111
-#  Failure                  -0.0358 0.0152 Inf   -0.0655 -0.006040  -2.358  0.0184
+# Neutral                  -0.0307 0.0152 Inf   -0.0605 -0.000878  -2.018  0.0436
+# Positive                 -0.0468 0.0153 Inf   -0.0767 -0.016923  -3.069  0.0021
+# Negative                 -0.0428 0.0152 Inf   -0.0726 -0.012991  -2.814  0.0049
+# Success                  -0.0386 0.0152 Inf   -0.0684 -0.008797  -2.538  0.0111
+# Failure                  -0.0358 0.0152 Inf   -0.0655 -0.006040  -2.358  0.0184
 
- late_dwell_planned_slopes <- contrast(
-  late_dwell_concerns_slopes, method = semantic_planned, adjust = "none"
-)
+late_dwell_planned_slopes <- contrast(
+late_dwell_concerns_slopes, method = semantic_planned, adjust = "none")
 late_dwell_planned_slopes
-# ontrast                           estimate      SE  df z.ratio p.value
-#  positive_vs_negative                0.00685 0.01290 Inf   0.529  0.5965
-#  Success_Failure                     0.00283 0.00906 Inf   0.312  0.7548
-#  performance_irrelevant_vs_relevant  0.01752 0.03530 Inf   0.496  0.6197
-#  NonNeutral_vs_Neutral              -0.04118 0.02910 Inf  -1.416  0.1568
+# contrast                           estimate      SE  df z.ratio p.value
+# positive_vs_negative                0.00685 0.01290 Inf   0.529  0.5965
+# success_vs_failure                  0.00283 0.00906 Inf   0.312  0.7548
+# performance_irrelevant_vs_relevant  0.01752 0.03530 Inf   0.496  0.6197
+# neutral_vs_nonneutral              -0.04118 0.02910 Inf  -1.416  0.1568
 
 # Whole-trial dwell time
 #-----------------------

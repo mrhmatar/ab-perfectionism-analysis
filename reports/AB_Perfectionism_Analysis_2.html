@@ -11,7 +11,7 @@
 
 <meta name="author" content="MM" />
 
-<meta name="date" content="2026-09-16" />
+<meta name="date" content="2026-09-17" />
 
 <title>Appendix B</title>
 
@@ -441,7 +441,7 @@ display: none;
 <h1 class="title toc-ignore">Appendix B</h1>
 <h3 class="subtitle">Study 2 - Attention Bias Manipulation</h3>
 <h4 class="author">MM</h4>
-<h4 class="date">2026-09-16</h4>
+<h4 class="date">2026-09-17</h4>
 
 </div>
 
@@ -531,6 +531,8 @@ Analyses: Post-Tangram Mood Conditional on Pre-Tangram Mood</a>
 Mood</a></li>
 <li><a href="#negative-mood" id="toc-negative-mood">Negative
 Mood</a></li>
+<li><a href="#decomposing-the-retained-interaction" id="toc-decomposing-the-retained-interaction">Decomposing the retained
+interaction</a></li>
 <li><a href="#distributional-model-diagnostics" id="toc-distributional-model-diagnostics">Distributional Model
 Diagnostics</a></li>
 </ul></li>
@@ -556,12 +558,13 @@ Multidimensional Perfectionism Scale (HMPS) and the Frost
 Multidimensional Perfectionism Scale (FMPS). As in Study 1, item
 scoring, reverse coding, and computation of questionnaire totals
 followed the standard scoring procedures for each instrument.</p>
-<p>Psychological distress was assessed repeatedly using seven Visual
-Analog Mood Scales (VAMS; 0–9). In line with the manuscript, these items
-were aggregated into Positive Mood (happy, excited, positive mood) and
-Negative Mood (sad, anxious, angry, negative mood) scores. Baseline
-depressive and anxiety symptoms were assessed using the CES-D and GAD-7
-and were retained as control variables.</p>
+<p>Momentary positive and negative mood/emotional states were assessed
+repeatedly using seven Visual Analog Mood Scales (VAMS; 0–9). In line
+with the manuscript, these items were aggregated into Positive Mood
+(happy, excited, positive mood) and Negative Mood (sad, anxious, angry,
+negative mood) scores. Baseline depressive and anxiety symptoms were
+assessed using the CES-D and GAD-7 and were retained as baseline symptom
+control variables, not as focal outcomes.</p>
 <pre class="r"><code># HMPS reverse coding
 qu2[, c(&quot;HMPS_2&quot;, &quot;HMPS_3&quot;, &quot;HMPS_4&quot;, &quot;HMPS_8&quot;, &quot;HMPS_9&quot;, &quot;HMPS_10&quot;, &quot;HMPS_12&quot;,
         &quot;HMPS_19&quot;, &quot;HMPS_21&quot;, &quot;HMPS_24&quot;, &quot;HMPS_30&quot;, &quot;HMPS_34&quot;, &quot;HMPS_36&quot;, &quot;HMPS_37&quot;,
@@ -956,184 +959,808 @@ correct_responses &lt;- correct_responses %&gt;%
 <pre><code>## 
 ## Français     &lt;NA&gt; 
 ##       90        2</code></pre>
-<p><strong>Questionnaires</strong></p>
-<pre class="r"><code>round(psych::describe(qu2[c(
-  &quot;SOP&quot;, &quot;OOP&quot;, &quot;SPP&quot;, &quot;PS&quot;, &quot;PE&quot;, &quot;PC&quot;, &quot;CM&quot;, &quot;DA&quot;, &quot;O&quot;,
-  &quot;Perf_Strivings&quot;, &quot;Perf_Concerns&quot;, &quot;CESD&quot;, &quot;GAD7&quot;,
-  &quot;POS_1&quot;, &quot;NEG_1&quot;, &quot;POS_2&quot;, &quot;NEG_2&quot;, &quot;POS_3&quot;, &quot;NEG_3&quot;,
-  &quot;POS_4&quot;, &quot;NEG_4&quot;
-)]), 2)</code></pre>
-<pre><code>##                vars  n  mean    sd median trimmed   mad   min    max range
-## SOP               1 92 67.80 16.66  67.00   68.09 16.31 26.00 101.00 75.00
-## OOP               2 92 51.96 12.28  52.50   52.04 12.60 17.00  87.00 70.00
-## SPP               3 92 50.39 15.25  48.50   49.91 17.05 15.00  89.00 74.00
-## PS                4 92 22.75  5.65  24.00   22.96  4.45  7.00  34.00 27.00
-## PE                5 92 12.93  5.26  13.00   12.74  5.93  5.00  24.00 19.00
-## PC                6 92  9.09  4.01   8.00    8.74  3.71  4.00  19.00 15.00
-## CM                7 92 25.28  9.25  25.00   25.20 11.86 10.00  44.00 34.00
-## DA                8 92 13.70  3.74  13.50   13.74  3.71  7.00  20.00 13.00
-## O                 9 92 22.99  5.20  24.00   23.35  5.19  7.00  30.00 23.00
-## Perf_Strivings   10 92 -0.06  1.86  -0.12   -0.02  1.54 -5.37   3.88  9.25
-## Perf_Concerns    11 92 -0.16  2.40  -0.27   -0.17  3.21 -4.73   4.98  9.71
-## CESD             12 92 19.13 10.88  17.50   18.46 12.60  3.00  44.00 41.00
-## GAD7             13 92  8.42  5.75   7.50    8.15  6.67  0.00  21.00 21.00
-## POS_1            14 92 12.46  5.96  12.00   12.43  7.41  2.00  25.00 23.00
-## NEG_1            15 92  4.39  3.83   4.00    3.89  3.71  0.00  16.00 16.00
-## POS_2            16 92 13.27  6.58  14.50   13.35  6.67  0.00  27.00 27.00
-## NEG_2            17 92  3.85  4.36   3.00    3.07  4.45  0.00  17.00 17.00
-## POS_3            18 92 11.89  6.56  11.50   11.81  6.67  0.00  26.00 26.00
-## NEG_3            19 92  3.15  3.25   2.00    2.72  2.97  0.00  11.00 11.00
-## POS_4            20 92 10.45  6.81  10.00   10.30  7.41  0.00  25.00 25.00
-## NEG_4            21 92  4.64  4.46   3.50    4.03  3.71  0.00  20.00 20.00
-##                 skew kurtosis   se
-## SOP            -0.14    -0.39 1.74
-## OOP            -0.13     0.25 1.28
-## SPP             0.29    -0.52 1.59
-## PS             -0.41    -0.11 0.59
-## PE              0.25    -1.10 0.55
-## PC              0.68    -0.58 0.42
-## CM              0.09    -1.17 0.96
-## DA             -0.12    -1.07 0.39
-## O              -0.61    -0.20 0.54
-## Perf_Strivings -0.22    -0.15 0.19
-## Perf_Concerns   0.05    -1.10 0.25
-## CESD            0.43    -0.72 1.13
-## GAD7            0.31    -1.00 0.60
-## POS_1           0.05    -1.07 0.62
-## NEG_1           1.22     1.34 0.40
-## POS_2          -0.16    -0.89 0.69
-## NEG_2           1.34     0.98 0.45
-## POS_3           0.11    -0.81 0.68
-## NEG_3           0.88    -0.31 0.34
-## POS_4           0.11    -0.95 0.71
-## NEG_4           1.16     1.00 0.46</code></pre>
+<p><strong>Participant characteristics and mood by
+condition</strong></p>
+<p>Table 2.1 presents observed participant-level M (SD) in the final
+analytic sample. CES-D and GAD-7 are baseline depressive/anxiety symptom
+control measures. VAMS scores describe momentary mood. VAMS 2 is
+pre-ABM, VAMS 3 is the shared post-ABM/pre-Tangram assessment, and VAMS
+4 is post-Tangram; the shared assessment is reported once, following the
+existing analysis coding.</p>
+<pre class="r"><code># Descriptive-only objects; leave analysis datasets and factor coding unchanged.
+s2_desc_conditions &lt;- c(&quot;Control&quot;, &quot;Success&quot;, &quot;Failure&quot;)
+s2_desc_labels &lt;- c(&quot;Control&quot;, &quot;Success-oriented&quot;, &quot;Failure-oriented&quot;)
+s2_desc_categories &lt;- c(&quot;Neutral&quot;, &quot;Positive&quot;, &quot;Negative&quot;, &quot;Success&quot;, &quot;Failure&quot;)
+s2_desc_mean &lt;- function(x) {
+  x &lt;- x[is.finite(x)]
+  if (length(x)) mean(x) else NA_real_
+}
+s2_desc_msd &lt;- function(x, digits = 2L) {
+  x &lt;- x[is.finite(x)]
+  if (!length(x)) return(&quot;--&quot;)
+  m &lt;- formatC(mean(x), format = &quot;f&quot;, digits = digits)
+  s &lt;- if (length(x) &gt; 1L) formatC(sd(x), format = &quot;f&quot;, digits = digits) else &quot;--&quot;
+  paste0(m, &quot; (&quot;, s, &quot;)&quot;)
+}
+stopifnot(!anyNA(qu2$Condition),
+          all(as.character(qu2$Condition) %in% s2_desc_conditions))
+s2_desc_n &lt;- vapply(s2_desc_conditions, function(g) {
+  sum(as.character(qu2$Condition) == g)
+}, integer(1))
+s2_desc_vars &lt;- c(&quot;Perf_Strivings&quot;, &quot;Perf_Concerns&quot;, &quot;CESD&quot;, &quot;GAD7&quot;,
+                  &quot;POS_2&quot;, &quot;NEG_2&quot;, &quot;POS_3&quot;, &quot;NEG_3&quot;, &quot;POS_4&quot;, &quot;NEG_4&quot;)
+s2_table21 &lt;- data.frame(Measure = c(
+  &quot;Perfectionistic Strivings&quot;, &quot;Perfectionistic Concerns&quot;,
+  &quot;CES-D depressive symptoms (control measure)&quot;,
+  &quot;GAD-7 anxiety symptoms (control measure)&quot;,
+  &quot;Positive mood: pre-ABM&quot;, &quot;Negative mood: pre-ABM&quot;,
+  &quot;Positive mood: post-ABM / pre-Tangram&quot;, &quot;Negative mood: post-ABM / pre-Tangram&quot;,
+  &quot;Positive mood: post-Tangram&quot;, &quot;Negative mood: post-Tangram&quot;
+), check.names = FALSE)
+for (j in seq_along(s2_desc_conditions)) {
+  s2_desc_rows &lt;- as.character(qu2$Condition) == s2_desc_conditions[j]
+  s2_table21[[paste0(s2_desc_labels[j], &quot; (n = &quot;, s2_desc_n[j], &quot;)&quot;)]] &lt;-
+    vapply(s2_desc_vars, function(v) s2_desc_msd(qu2[[v]][s2_desc_rows]), character(1))
+}
+knitr::kable(s2_table21, row.names = FALSE,
+  caption = &quot;Table 2.1. Participant characteristics and momentary mood by ABM condition: M (SD).&quot;)</code></pre>
+<table>
+<caption>Table 2.1. Participant characteristics and momentary mood by
+ABM condition: M (SD).</caption>
+<colgroup>
+<col width="38%" />
+<col width="15%" />
+<col width="23%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Measure</th>
+<th align="left">Control (n = 29)</th>
+<th align="left">Success-oriented (n = 33)</th>
+<th align="left">Failure-oriented (n = 30)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Perfectionistic Strivings</td>
+<td align="left">0.13 (1.67)</td>
+<td align="left">-0.43 (1.88)</td>
+<td align="left">0.18 (2.00)</td>
+</tr>
+<tr class="even">
+<td align="left">Perfectionistic Concerns</td>
+<td align="left">0.14 (2.39)</td>
+<td align="left">-0.50 (2.51)</td>
+<td align="left">-0.07 (2.34)</td>
+</tr>
+<tr class="odd">
+<td align="left">CES-D depressive symptoms (control measure)</td>
+<td align="left">22.14 (11.00)</td>
+<td align="left">15.61 (9.08)</td>
+<td align="left">20.10 (11.82)</td>
+</tr>
+<tr class="even">
+<td align="left">GAD-7 anxiety symptoms (control measure)</td>
+<td align="left">9.86 (5.28)</td>
+<td align="left">6.55 (5.24)</td>
+<td align="left">9.10 (6.34)</td>
+</tr>
+<tr class="odd">
+<td align="left">Positive mood: pre-ABM</td>
+<td align="left">14.03 (6.60)</td>
+<td align="left">12.42 (6.22)</td>
+<td align="left">13.47 (7.04)</td>
+</tr>
+<tr class="even">
+<td align="left">Negative mood: pre-ABM</td>
+<td align="left">4.41 (3.76)</td>
+<td align="left">3.39 (4.73)</td>
+<td align="left">3.80 (4.57)</td>
+</tr>
+<tr class="odd">
+<td align="left">Positive mood: post-ABM / pre-Tangram</td>
+<td align="left">12.90 (6.78)</td>
+<td align="left">11.15 (6.01)</td>
+<td align="left">11.73 (7.02)</td>
+</tr>
+<tr class="even">
+<td align="left">Negative mood: post-ABM / pre-Tangram</td>
+<td align="left">3.97 (3.35)</td>
+<td align="left">2.67 (3.29)</td>
+<td align="left">2.90 (3.06)</td>
+</tr>
+<tr class="odd">
+<td align="left">Positive mood: post-Tangram</td>
+<td align="left">11.28 (6.52)</td>
+<td align="left">9.97 (6.72)</td>
+<td align="left">10.17 (7.32)</td>
+</tr>
+<tr class="even">
+<td align="left">Negative mood: post-Tangram</td>
+<td align="left">4.86 (3.67)</td>
+<td align="left">4.00 (4.13)</td>
+<td align="left">5.13 (5.46)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note.</em> Condition n denotes the full analytic group; each cell
+uses available finite observations. Perfectionism dimensions retain
+their existing sums of standardized subscale scores. Positive/negative
+mood are VAMS item sums (range 0-27/0-36). A dash denotes an unavailable
+mean or SD.</p>
+<p><strong>Task and attention descriptives by condition and
+assessment</strong></p>
+<p>Table 2.2 reports observed scores before model boundary adjustment.
+For each participant, eye-tracking indices are averaged across retained
+paired blocks within AOI category, and RTs across retained paired trials
+within changed-word category, retaining the existing correct-trial and
+minimum-RT exclusions. The table then reports M (SD) across participant
+means, giving participants equal weight within each cell. Accuracy and
+rule awareness retain their existing definitions: numbers of correct
+trials and blocks with awareness, respectively, across all categories.
+No inferential tests, change scores, or model-estimated means are
+included.</p>
+<pre class="r"><code># Session IDs may differ between assessments: use both keys for condition lookup.
+s2_desc_lookup &lt;- rt2 %&gt;%
+  distinct(subject_id, Temps_de_mesure, ID = Code) %&gt;%
+  inner_join(qu2 %&gt;% select(ID, Condition), by = &quot;ID&quot;, relationship = &quot;many-to-one&quot;)
+stopifnot(!anyDuplicated(s2_desc_lookup[c(&quot;subject_id&quot;, &quot;Temps_de_mesure&quot;)]))
+s2_desc_accuracy &lt;- accuracy %&gt;%
+  inner_join(s2_desc_lookup, by = c(&quot;subject_id&quot;, &quot;Temps_de_mesure&quot;),
+             relationship = &quot;one-to-one&quot;)
+s2_desc_awareness &lt;- rule_awareness %&gt;%
+  inner_join(s2_desc_lookup, by = c(&quot;subject_id&quot;, &quot;Temps_de_mesure&quot;),
+             relationship = &quot;one-to-one&quot;)
+s2_desc_et_vars &lt;- c(&quot;first_fix_prob&quot;, &quot;first_fix_latency&quot;, &quot;dwell_time_early&quot;,
+                     &quot;dwell_time_intermediate&quot;, &quot;dwell_time_late&quot;, &quot;dwell_time&quot;)
+s2_desc_et_labels &lt;- c(&quot;First-or-second fixation probability&quot;,
+                       &quot;First-fixation latency (proportion)&quot;,
+                       &quot;Early dwell (proportion)&quot;, &quot;Intermediate dwell (proportion)&quot;,
+                       &quot;Late dwell (proportion)&quot;, &quot;Whole-trial dwell (proportion)&quot;)
+stopifnot(all(as.character(et_qu2$IA_LABEL) %in% s2_desc_categories),
+          all(as.character(rt_qu2$Change_category) %in% s2_desc_categories))
+s2_desc_parts &lt;- list()
+for (t in 1:2) {
+  s2_desc_time &lt;- paste0(&quot;T&quot;, t)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] &lt;- s2_desc_accuracy %&gt;%
+    filter(Temps_de_mesure == s2_desc_time) %&gt;%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = &quot;Change-detection accuracy (correct trials)&quot;,
+              Category = &quot;All categories&quot;, Value = correct_response)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] &lt;- s2_desc_awareness %&gt;%
+    filter(Temps_de_mesure == s2_desc_time) %&gt;%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = &quot;Rule awareness (blocks)&quot;,
+              Category = &quot;All categories&quot;, Value = guessed_block_rule)
+  for (j in seq_along(s2_desc_et_vars)) {
+    s2_desc_column &lt;- paste0(s2_desc_et_vars[j], &quot;_&quot;, t)
+    s2_desc_parts[[length(s2_desc_parts) + 1L]] &lt;- et_qu2 %&gt;%
+      group_by(ID, Condition, IA_LABEL) %&gt;%
+      summarise(Value = s2_desc_mean(.data[[s2_desc_column]]), .groups = &quot;drop&quot;) %&gt;%
+      transmute(ID, Condition, Assessment = s2_desc_time,
+                Measure = s2_desc_et_labels[j], Category = as.character(IA_LABEL), Value)
+  }
+  s2_desc_column &lt;- paste0(&quot;response_time_&quot;, t)
+  s2_desc_parts[[length(s2_desc_parts) + 1L]] &lt;- rt_qu2 %&gt;%
+    group_by(ID, Condition, Change_category) %&gt;%
+    summarise(Value = s2_desc_mean(.data[[s2_desc_column]]), .groups = &quot;drop&quot;) %&gt;%
+    transmute(ID, Condition, Assessment = s2_desc_time,
+              Measure = &quot;Response time (ms)&quot;, Category = as.character(Change_category), Value)
+}
+s2_desc_values &lt;- bind_rows(s2_desc_parts)
+s2_table22 &lt;- data.frame(
+  Measure = c(&quot;Change-detection accuracy (correct trials)&quot;, &quot;Rule awareness (blocks)&quot;,
+              rep(c(s2_desc_et_labels, &quot;Response time (ms)&quot;), each = 5L)),
+  Category = c(rep(&quot;All categories&quot;, 2L), rep(s2_desc_categories, 7L)),
+  check.names = FALSE
+)
+for (t in 1:2) {
+  for (j in seq_along(s2_desc_conditions)) {
+    s2_desc_cells &lt;- s2_desc_values %&gt;%
+      filter(Assessment == paste0(&quot;T&quot;, t), Condition == s2_desc_conditions[j])
+    s2_desc_heading &lt;- paste0(c(&quot;Pre-ABM&quot;, &quot;Post-ABM&quot;)[t], &quot;: &quot;, s2_desc_labels[j])
+    s2_table22[[s2_desc_heading]] &lt;- vapply(seq_len(nrow(s2_table22)), function(i) {
+      x &lt;- s2_desc_cells$Value[s2_desc_cells$Measure == s2_table22$Measure[i] &amp;
+                               s2_desc_cells$Category == s2_table22$Category[i]]
+      s2_desc_msd(x, digits = if (s2_table22$Measure[i] %in% s2_desc_et_labels) 3L else 2L)
+    }, character(1))
+  }
+}
+knitr::kable(s2_table22, row.names = FALSE,
+  caption = &quot;Table 2.2. Task and attention descriptives by ABM condition, assessment, and semantic category: M (SD).&quot;)</code></pre>
+<table>
+<caption>Table 2.2. Task and attention descriptives by ABM condition,
+assessment, and semantic category: M (SD).</caption>
+<colgroup>
+<col width="21%" />
+<col width="7%" />
+<col width="8%" />
+<col width="13%" />
+<col width="13%" />
+<col width="9%" />
+<col width="13%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Measure</th>
+<th align="left">Category</th>
+<th align="left">Pre-ABM: Control</th>
+<th align="left">Pre-ABM: Success-oriented</th>
+<th align="left">Pre-ABM: Failure-oriented</th>
+<th align="left">Post-ABM: Control</th>
+<th align="left">Post-ABM: Success-oriented</th>
+<th align="left">Post-ABM: Failure-oriented</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Change-detection accuracy (correct trials)</td>
+<td align="left">All categories</td>
+<td align="left">73.93 (1.07)</td>
+<td align="left">73.64 (1.62)</td>
+<td align="left">73.77 (1.48)</td>
+<td align="left">73.79 (1.18)</td>
+<td align="left">74.09 (1.13)</td>
+<td align="left">73.70 (1.84)</td>
+</tr>
+<tr class="even">
+<td align="left">Rule awareness (blocks)</td>
+<td align="left">All categories</td>
+<td align="left">8.31 (1.91)</td>
+<td align="left">6.85 (2.94)</td>
+<td align="left">7.80 (2.51)</td>
+<td align="left">9.21 (1.52)</td>
+<td align="left">9.00 (1.80)</td>
+<td align="left">9.10 (1.81)</td>
+</tr>
+<tr class="odd">
+<td align="left">First-or-second fixation probability</td>
+<td align="left">Neutral</td>
+<td align="left">0.412 (0.055)</td>
+<td align="left">0.401 (0.045)</td>
+<td align="left">0.418 (0.030)</td>
+<td align="left">0.426 (0.064)</td>
+<td align="left">0.431 (0.069)</td>
+<td align="left">0.450 (0.078)</td>
+</tr>
+<tr class="even">
+<td align="left">First-or-second fixation probability</td>
+<td align="left">Positive</td>
+<td align="left">0.431 (0.046)</td>
+<td align="left">0.420 (0.040)</td>
+<td align="left">0.418 (0.036)</td>
+<td align="left">0.453 (0.057)</td>
+<td align="left">0.424 (0.042)</td>
+<td align="left">0.442 (0.048)</td>
+</tr>
+<tr class="odd">
+<td align="left">First-or-second fixation probability</td>
+<td align="left">Negative</td>
+<td align="left">0.397 (0.045)</td>
+<td align="left">0.407 (0.042)</td>
+<td align="left">0.404 (0.040)</td>
+<td align="left">0.432 (0.066)</td>
+<td align="left">0.418 (0.051)</td>
+<td align="left">0.430 (0.059)</td>
+</tr>
+<tr class="even">
+<td align="left">First-or-second fixation probability</td>
+<td align="left">Success</td>
+<td align="left">0.427 (0.055)</td>
+<td align="left">0.426 (0.041)</td>
+<td align="left">0.424 (0.046)</td>
+<td align="left">0.438 (0.049)</td>
+<td align="left">0.433 (0.043)</td>
+<td align="left">0.465 (0.069)</td>
+</tr>
+<tr class="odd">
+<td align="left">First-or-second fixation probability</td>
+<td align="left">Failure</td>
+<td align="left">0.423 (0.037)</td>
+<td align="left">0.413 (0.050)</td>
+<td align="left">0.423 (0.043)</td>
+<td align="left">0.433 (0.059)</td>
+<td align="left">0.426 (0.049)</td>
+<td align="left">0.457 (0.066)</td>
+</tr>
+<tr class="even">
+<td align="left">First-fixation latency (proportion)</td>
+<td align="left">Neutral</td>
+<td align="left">0.201 (0.007)</td>
+<td align="left">0.202 (0.008)</td>
+<td align="left">0.200 (0.006)</td>
+<td align="left">0.202 (0.007)</td>
+<td align="left">0.199 (0.007)</td>
+<td align="left">0.202 (0.008)</td>
+</tr>
+<tr class="odd">
+<td align="left">First-fixation latency (proportion)</td>
+<td align="left">Positive</td>
+<td align="left">0.197 (0.005)</td>
+<td align="left">0.198 (0.007)</td>
+<td align="left">0.199 (0.006)</td>
+<td align="left">0.195 (0.006)</td>
+<td align="left">0.198 (0.006)</td>
+<td align="left">0.199 (0.007)</td>
+</tr>
+<tr class="even">
+<td align="left">First-fixation latency (proportion)</td>
+<td align="left">Negative</td>
+<td align="left">0.204 (0.008)</td>
+<td align="left">0.198 (0.007)</td>
+<td align="left">0.202 (0.008)</td>
+<td align="left">0.201 (0.007)</td>
+<td align="left">0.201 (0.006)</td>
+<td align="left">0.201 (0.006)</td>
+</tr>
+<tr class="odd">
+<td align="left">First-fixation latency (proportion)</td>
+<td align="left">Success</td>
+<td align="left">0.199 (0.009)</td>
+<td align="left">0.200 (0.006)</td>
+<td align="left">0.200 (0.007)</td>
+<td align="left">0.200 (0.005)</td>
+<td align="left">0.201 (0.007)</td>
+<td align="left">0.198 (0.007)</td>
+</tr>
+<tr class="even">
+<td align="left">First-fixation latency (proportion)</td>
+<td align="left">Failure</td>
+<td align="left">0.200 (0.007)</td>
+<td align="left">0.202 (0.009)</td>
+<td align="left">0.200 (0.008)</td>
+<td align="left">0.201 (0.006)</td>
+<td align="left">0.201 (0.006)</td>
+<td align="left">0.200 (0.007)</td>
+</tr>
+<tr class="odd">
+<td align="left">Early dwell (proportion)</td>
+<td align="left">Neutral</td>
+<td align="left">0.199 (0.024)</td>
+<td align="left">0.191 (0.021)</td>
+<td align="left">0.200 (0.019)</td>
+<td align="left">0.197 (0.028)</td>
+<td align="left">0.198 (0.023)</td>
+<td align="left">0.189 (0.027)</td>
+</tr>
+<tr class="even">
+<td align="left">Early dwell (proportion)</td>
+<td align="left">Positive</td>
+<td align="left">0.204 (0.022)</td>
+<td align="left">0.206 (0.022)</td>
+<td align="left">0.207 (0.020)</td>
+<td align="left">0.212 (0.025)</td>
+<td align="left">0.203 (0.019)</td>
+<td align="left">0.204 (0.025)</td>
+</tr>
+<tr class="odd">
+<td align="left">Early dwell (proportion)</td>
+<td align="left">Negative</td>
+<td align="left">0.192 (0.025)</td>
+<td align="left">0.204 (0.023)</td>
+<td align="left">0.195 (0.023)</td>
+<td align="left">0.197 (0.032)</td>
+<td align="left">0.199 (0.029)</td>
+<td align="left">0.192 (0.025)</td>
+</tr>
+<tr class="even">
+<td align="left">Early dwell (proportion)</td>
+<td align="left">Success</td>
+<td align="left">0.203 (0.021)</td>
+<td align="left">0.201 (0.023)</td>
+<td align="left">0.198 (0.028)</td>
+<td align="left">0.200 (0.018)</td>
+<td align="left">0.200 (0.018)</td>
+<td align="left">0.213 (0.021)</td>
+</tr>
+<tr class="odd">
+<td align="left">Early dwell (proportion)</td>
+<td align="left">Failure</td>
+<td align="left">0.202 (0.021)</td>
+<td align="left">0.198 (0.030)</td>
+<td align="left">0.200 (0.023)</td>
+<td align="left">0.195 (0.024)</td>
+<td align="left">0.200 (0.028)</td>
+<td align="left">0.203 (0.025)</td>
+</tr>
+<tr class="even">
+<td align="left">Intermediate dwell (proportion)</td>
+<td align="left">Neutral</td>
+<td align="left">0.197 (0.019)</td>
+<td align="left">0.192 (0.019)</td>
+<td align="left">0.192 (0.020)</td>
+<td align="left">0.199 (0.027)</td>
+<td align="left">0.200 (0.026)</td>
+<td align="left">0.195 (0.023)</td>
+</tr>
+<tr class="odd">
+<td align="left">Intermediate dwell (proportion)</td>
+<td align="left">Positive</td>
+<td align="left">0.204 (0.021)</td>
+<td align="left">0.205 (0.019)</td>
+<td align="left">0.208 (0.021)</td>
+<td align="left">0.205 (0.022)</td>
+<td align="left">0.205 (0.022)</td>
+<td align="left">0.199 (0.022)</td>
+</tr>
+<tr class="even">
+<td align="left">Intermediate dwell (proportion)</td>
+<td align="left">Negative</td>
+<td align="left">0.199 (0.020)</td>
+<td align="left">0.208 (0.023)</td>
+<td align="left">0.200 (0.025)</td>
+<td align="left">0.211 (0.025)</td>
+<td align="left">0.197 (0.018)</td>
+<td align="left">0.210 (0.018)</td>
+</tr>
+<tr class="odd">
+<td align="left">Intermediate dwell (proportion)</td>
+<td align="left">Success</td>
+<td align="left">0.199 (0.018)</td>
+<td align="left">0.203 (0.020)</td>
+<td align="left">0.212 (0.028)</td>
+<td align="left">0.198 (0.021)</td>
+<td align="left">0.199 (0.023)</td>
+<td align="left">0.203 (0.019)</td>
+</tr>
+<tr class="even">
+<td align="left">Intermediate dwell (proportion)</td>
+<td align="left">Failure</td>
+<td align="left">0.201 (0.022)</td>
+<td align="left">0.192 (0.018)</td>
+<td align="left">0.189 (0.023)</td>
+<td align="left">0.187 (0.022)</td>
+<td align="left">0.198 (0.028)</td>
+<td align="left">0.194 (0.029)</td>
+</tr>
+<tr class="odd">
+<td align="left">Late dwell (proportion)</td>
+<td align="left">Neutral</td>
+<td align="left">0.181 (0.041)</td>
+<td align="left">0.201 (0.034)</td>
+<td align="left">0.189 (0.027)</td>
+<td align="left">0.191 (0.033)</td>
+<td align="left">0.198 (0.034)</td>
+<td align="left">0.199 (0.028)</td>
+</tr>
+<tr class="even">
+<td align="left">Late dwell (proportion)</td>
+<td align="left">Positive</td>
+<td align="left">0.198 (0.033)</td>
+<td align="left">0.197 (0.028)</td>
+<td align="left">0.205 (0.026)</td>
+<td align="left">0.203 (0.025)</td>
+<td align="left">0.193 (0.026)</td>
+<td align="left">0.181 (0.027)</td>
+</tr>
+<tr class="odd">
+<td align="left">Late dwell (proportion)</td>
+<td align="left">Negative</td>
+<td align="left">0.200 (0.027)</td>
+<td align="left">0.204 (0.043)</td>
+<td align="left">0.203 (0.041)</td>
+<td align="left">0.206 (0.035)</td>
+<td align="left">0.196 (0.023)</td>
+<td align="left">0.207 (0.024)</td>
+</tr>
+<tr class="even">
+<td align="left">Late dwell (proportion)</td>
+<td align="left">Success</td>
+<td align="left">0.203 (0.039)</td>
+<td align="left">0.201 (0.029)</td>
+<td align="left">0.210 (0.033)</td>
+<td align="left">0.202 (0.027)</td>
+<td align="left">0.212 (0.031)</td>
+<td align="left">0.206 (0.030)</td>
+</tr>
+<tr class="odd">
+<td align="left">Late dwell (proportion)</td>
+<td align="left">Failure</td>
+<td align="left">0.218 (0.044)</td>
+<td align="left">0.197 (0.032)</td>
+<td align="left">0.194 (0.031)</td>
+<td align="left">0.198 (0.033)</td>
+<td align="left">0.202 (0.029)</td>
+<td align="left">0.209 (0.033)</td>
+</tr>
+<tr class="even">
+<td align="left">Whole-trial dwell (proportion)</td>
+<td align="left">Neutral</td>
+<td align="left">0.190 (0.023)</td>
+<td align="left">0.196 (0.019)</td>
+<td align="left">0.191 (0.018)</td>
+<td align="left">0.195 (0.024)</td>
+<td align="left">0.200 (0.024)</td>
+<td align="left">0.196 (0.020)</td>
+</tr>
+<tr class="odd">
+<td align="left">Whole-trial dwell (proportion)</td>
+<td align="left">Positive</td>
+<td align="left">0.201 (0.018)</td>
+<td align="left">0.201 (0.016)</td>
+<td align="left">0.206 (0.015)</td>
+<td align="left">0.205 (0.017)</td>
+<td align="left">0.200 (0.018)</td>
+<td align="left">0.191 (0.018)</td>
+</tr>
+<tr class="even">
+<td align="left">Whole-trial dwell (proportion)</td>
+<td align="left">Negative</td>
+<td align="left">0.199 (0.018)</td>
+<td align="left">0.206 (0.026)</td>
+<td align="left">0.201 (0.026)</td>
+<td align="left">0.206 (0.024)</td>
+<td align="left">0.197 (0.013)</td>
+<td align="left">0.207 (0.016)</td>
+</tr>
+<tr class="odd">
+<td align="left">Whole-trial dwell (proportion)</td>
+<td align="left">Success</td>
+<td align="left">0.202 (0.021)</td>
+<td align="left">0.202 (0.019)</td>
+<td align="left">0.209 (0.022)</td>
+<td align="left">0.200 (0.017)</td>
+<td align="left">0.204 (0.019)</td>
+<td align="left">0.207 (0.019)</td>
+</tr>
+<tr class="even">
+<td align="left">Whole-trial dwell (proportion)</td>
+<td align="left">Failure</td>
+<td align="left">0.209 (0.022)</td>
+<td align="left">0.195 (0.016)</td>
+<td align="left">0.193 (0.020)</td>
+<td align="left">0.193 (0.021)</td>
+<td align="left">0.199 (0.017)</td>
+<td align="left">0.200 (0.023)</td>
+</tr>
+<tr class="odd">
+<td align="left">Response time (ms)</td>
+<td align="left">Neutral</td>
+<td align="left">1807.91 (509.70)</td>
+<td align="left">1825.30 (574.43)</td>
+<td align="left">1666.05 (541.56)</td>
+<td align="left">1422.35 (597.19)</td>
+<td align="left">1221.12 (342.82)</td>
+<td align="left">1237.95 (431.95)</td>
+</tr>
+<tr class="even">
+<td align="left">Response time (ms)</td>
+<td align="left">Positive</td>
+<td align="left">1580.23 (409.58)</td>
+<td align="left">1757.63 (532.38)</td>
+<td align="left">1611.19 (540.22)</td>
+<td align="left">1284.06 (398.30)</td>
+<td align="left">1361.00 (401.71)</td>
+<td align="left">1344.71 (578.43)</td>
+</tr>
+<tr class="odd">
+<td align="left">Response time (ms)</td>
+<td align="left">Negative</td>
+<td align="left">1519.76 (492.32)</td>
+<td align="left">1686.53 (519.18)</td>
+<td align="left">1535.88 (528.00)</td>
+<td align="left">1246.64 (464.49)</td>
+<td align="left">1314.60 (447.87)</td>
+<td align="left">1260.80 (587.47)</td>
+</tr>
+<tr class="even">
+<td align="left">Response time (ms)</td>
+<td align="left">Success</td>
+<td align="left">1640.50 (529.34)</td>
+<td align="left">1878.89 (522.83)</td>
+<td align="left">1562.51 (640.25)</td>
+<td align="left">1367.94 (575.94)</td>
+<td align="left">1338.79 (564.68)</td>
+<td align="left">1225.09 (471.21)</td>
+</tr>
+<tr class="odd">
+<td align="left">Response time (ms)</td>
+<td align="left">Failure</td>
+<td align="left">1486.79 (452.79)</td>
+<td align="left">1755.66 (577.00)</td>
+<td align="left">1491.91 (561.86)</td>
+<td align="left">1356.97 (640.45)</td>
+<td align="left">1233.68 (355.51)</td>
+<td align="left">1159.72 (362.13)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note.</em> SDs describe between-participant variation. Cells use
+available finite participant summaries and may have fewer observations
+than the condition n in Table 2.1. Eye-tracking categories refer to the
+viewed AOI; RT categories refer to the changed word. Eye-tracking
+indices retain their original probability/ proportion scales.
+Proportional latency is the category block-mean latency divided by the
+sum of category block-mean latencies, not latency in milliseconds. Dwell
+windows are early (500-1500 ms), intermediate (1500-3500 ms), late
+(3500-5500 ms), and whole trial (500-5500 ms). RTs are in milliseconds.
+A dash denotes an unavailable mean or SD.</p>
+<p><strong>Correlations</strong></p>
+<p>Table 2.3 retains the existing pooled correlation matrix, variable
+order, and significance-star calculation for the final analytic
+sample.</p>
 <pre class="r"><code>corr_table &lt;- corr.test(qu2[c(&quot;Perf_Strivings&quot;, &quot;Perf_Concerns&quot;,
                               &quot;POS_2&quot;, &quot;NEG_2&quot;, &quot;POS_3&quot;, &quot;NEG_3&quot;,
                               &quot;POS_4&quot;, &quot;NEG_4&quot;, &quot;CESD&quot;, &quot;GAD7&quot;)])$stars
-print(corr_table)</code></pre>
-<pre><code>##                Perf_Strivings Perf_Concerns POS_2     NEG_2     POS_3    
-## Perf_Strivings &quot;1***&quot;         &quot;0.66***&quot;     &quot;-0.05 &quot;  &quot;0.19 &quot;   &quot;0.09 &quot;  
-## Perf_Concerns  &quot;0.66***&quot;      &quot;1***&quot;        &quot;-0.1 &quot;   &quot;0.42***&quot; &quot;-0.08 &quot; 
-## POS_2          &quot;-0.05 &quot;       &quot;-0.1 &quot;       &quot;1***&quot;    &quot;-0.22 &quot;  &quot;0.88***&quot;
-## NEG_2          &quot;0.19 &quot;        &quot;0.42***&quot;     &quot;-0.22*&quot;  &quot;1***&quot;    &quot;-0.17 &quot; 
-## POS_3          &quot;0.09 &quot;        &quot;-0.08 &quot;      &quot;0.88***&quot; &quot;-0.17 &quot;  &quot;1***&quot;   
-## NEG_3          &quot;0.25*&quot;        &quot;0.44***&quot;     &quot;-0.16 &quot;  &quot;0.84***&quot; &quot;-0.16 &quot; 
-## POS_4          &quot;0.02 &quot;        &quot;-0.06 &quot;      &quot;0.82***&quot; &quot;-0.14 &quot;  &quot;0.84***&quot;
-## NEG_4          &quot;0.34***&quot;      &quot;0.49***&quot;     &quot;-0.14 &quot;  &quot;0.66***&quot; &quot;-0.12 &quot; 
-## CESD           &quot;0.28**&quot;       &quot;0.55***&quot;     &quot;-0.2 &quot;   &quot;0.56***&quot; &quot;-0.22*&quot; 
-## GAD7           &quot;0.34**&quot;       &quot;0.52***&quot;     &quot;-0.19 &quot;  &quot;0.53***&quot; &quot;-0.22*&quot; 
-##                NEG_3     POS_4     NEG_4     CESD      GAD7     
-## Perf_Strivings &quot;0.25 &quot;   &quot;0.02 &quot;   &quot;0.34*&quot;   &quot;0.28 &quot;   &quot;0.34*&quot;  
-## Perf_Concerns  &quot;0.44***&quot; &quot;-0.06 &quot;  &quot;0.49***&quot; &quot;0.55***&quot; &quot;0.52***&quot;
-## POS_2          &quot;-0.16 &quot;  &quot;0.82***&quot; &quot;-0.14 &quot;  &quot;-0.2 &quot;   &quot;-0.19 &quot; 
-## NEG_2          &quot;0.84***&quot; &quot;-0.14 &quot;  &quot;0.66***&quot; &quot;0.56***&quot; &quot;0.53***&quot;
-## POS_3          &quot;-0.16 &quot;  &quot;0.84***&quot; &quot;-0.12 &quot;  &quot;-0.22 &quot;  &quot;-0.22 &quot; 
-## NEG_3          &quot;1***&quot;    &quot;-0.16 &quot;  &quot;0.71***&quot; &quot;0.54***&quot; &quot;0.55***&quot;
-## POS_4          &quot;-0.16 &quot;  &quot;1***&quot;    &quot;-0.28 &quot;  &quot;-0.15 &quot;  &quot;-0.16 &quot; 
-## NEG_4          &quot;0.71***&quot; &quot;-0.28**&quot; &quot;1***&quot;    &quot;0.52***&quot; &quot;0.51***&quot;
-## CESD           &quot;0.54***&quot; &quot;-0.15 &quot;  &quot;0.52***&quot; &quot;1***&quot;    &quot;0.8***&quot; 
-## GAD7           &quot;0.55***&quot; &quot;-0.16 &quot;  &quot;0.51***&quot; &quot;0.8***&quot;  &quot;1***&quot;</code></pre>
-<p><strong>Response Time</strong></p>
-<pre class="r"><code>round(psych::describe(rt_qu2[c(&quot;response_time_1&quot;, &quot;response_time_2&quot;)]), 2)</code></pre>
-<pre><code>##                 vars    n    mean      sd median trimmed    mad min   max range
-## response_time_1    1 6782 1658.23 1018.68 1324.5 1506.71 793.93 212 11124 10912
-## response_time_2    2 6784 1287.89  905.73  889.5 1107.66 343.22 263 11416 11153
-##                 skew kurtosis    se
-## response_time_1 1.72     5.35 12.37
-## response_time_2 2.51    10.61 11.00</code></pre>
-<pre class="r"><code>rt_qu2 %&gt;%
-  group_by(Change_category) %&gt;%
-  summarise(
-    M_response_time_1 = round(mean(response_time_1, na.rm = TRUE), 2),
-    SD_response_time_1 = round(sd(response_time_1, na.rm = TRUE), 2),
-    M_response_time_2 = round(mean(response_time_2, na.rm = TRUE), 2),
-    SD_response_time_2 = round(sd(response_time_2, na.rm = TRUE), 2),
-    .groups = &quot;drop&quot;
-  )</code></pre>
-<pre><code>## # A tibble: 5 × 5
-##   Change_category M_response_time_1 SD_response_time_1 M_response_time_2
-##   &lt;chr&gt;                       &lt;dbl&gt;              &lt;dbl&gt;             &lt;dbl&gt;
-## 1 Failure                     1585.              1001.             1246.
-## 2 Negative                    1586.               988.             1272.
-## 3 Neutral                     1769.              1053.             1287.
-## 4 Positive                    1652.               947.             1329.
-## 5 Success                     1699.              1088.             1304.
-## # ℹ 1 more variable: SD_response_time_2 &lt;dbl&gt;</code></pre>
-<p><strong>Eye-Tracking Indices</strong></p>
-<pre class="r"><code>round(describe(et_qu2[c(&quot;first_fix_prob_1&quot;, &quot;first_fix_latency_1&quot;, &quot;dwell_time_1&quot;,
-                        &quot;dwell_time_early_1&quot;, &quot;dwell_time_intermediate_1&quot;, &quot;dwell_time_late_1&quot;)]), 2)</code></pre>
-<pre><code>##                           vars    n mean   sd median trimmed  mad  min  max
-## first_fix_prob_1             1 4584 0.42 0.16   0.43    0.41 0.21 0.00 1.00
-## first_fix_latency_1          2 4584 0.20 0.02   0.20    0.20 0.02 0.11 0.30
-## dwell_time_1                 3 4584 0.20 0.10   0.18    0.18 0.06 0.02 0.78
-## dwell_time_early_1           4 4584 0.20 0.09   0.20    0.20 0.08 0.00 0.66
-## dwell_time_intermediate_1    5 4584 0.20 0.09   0.19    0.19 0.06 0.00 0.82
-## dwell_time_late_1            6 4584 0.20 0.17   0.16    0.17 0.11 0.00 1.00
-##                           range skew kurtosis se
-## first_fix_prob_1           1.00 0.17     0.23  0
-## first_fix_latency_1        0.19 0.20     0.38  0
-## dwell_time_1               0.76 2.15     5.81  0
-## dwell_time_early_1         0.66 0.26     0.31  0
-## dwell_time_intermediate_1  0.82 1.71     5.60  0
-## dwell_time_late_1          1.00 1.97     4.24  0</code></pre>
-<pre class="r"><code>round(describe(et_qu2[c(&quot;first_fix_prob_2&quot;, &quot;first_fix_latency_2&quot;, &quot;dwell_time_2&quot;,
-                        &quot;dwell_time_early_2&quot;, &quot;dwell_time_intermediate_2&quot;, &quot;dwell_time_late_2&quot;)]), 2)</code></pre>
-<pre><code>##                           vars    n mean   sd median trimmed  mad  min  max
-## first_fix_prob_2             1 4584 0.44 0.18   0.43    0.43 0.21 0.00 1.00
-## first_fix_latency_2          2 4584 0.20 0.03   0.20    0.20 0.02 0.08 0.38
-## dwell_time_2                 3 4584 0.20 0.15   0.15    0.17 0.07 0.02 0.81
-## dwell_time_early_2           4 4584 0.20 0.09   0.20    0.20 0.08 0.00 0.82
-## dwell_time_intermediate_2    5 4584 0.20 0.13   0.17    0.18 0.08 0.00 1.00
-## dwell_time_late_2            6 4584 0.20 0.24   0.11    0.15 0.11 0.00 1.00
-##                           range skew kurtosis se
-## first_fix_prob_2           1.00 0.25     0.33  0
-## first_fix_latency_2        0.30 0.26     1.48  0
-## dwell_time_2               0.79 1.84     2.70  0
-## dwell_time_early_2         0.82 0.46     1.21  0
-## dwell_time_intermediate_2  1.00 1.95     4.90  0
-## dwell_time_late_2          1.00 1.70     1.80  0</code></pre>
+knitr::kable(corr_table, row.names = TRUE,
+  caption = &quot;Table 2.3. Correlations among perfectionism, momentary mood, and baseline symptom control measures.&quot;)</code></pre>
+<table>
+<caption>Table 2.3. Correlations among perfectionism, momentary mood,
+and baseline symptom control measures.</caption>
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="12%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">Perf_Strivings</th>
+<th align="left">Perf_Concerns</th>
+<th align="left">POS_2</th>
+<th align="left">NEG_2</th>
+<th align="left">POS_3</th>
+<th align="left">NEG_3</th>
+<th align="left">POS_4</th>
+<th align="left">NEG_4</th>
+<th align="left">CESD</th>
+<th align="left">GAD7</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Perf_Strivings</td>
+<td align="left">1***</td>
+<td align="left">0.66***</td>
+<td align="left">-0.05</td>
+<td align="left">0.19</td>
+<td align="left">0.09</td>
+<td align="left">0.25</td>
+<td align="left">0.02</td>
+<td align="left">0.34*</td>
+<td align="left">0.28</td>
+<td align="left">0.34*</td>
+</tr>
+<tr class="even">
+<td align="left">Perf_Concerns</td>
+<td align="left">0.66***</td>
+<td align="left">1***</td>
+<td align="left">-0.1</td>
+<td align="left">0.42***</td>
+<td align="left">-0.08</td>
+<td align="left">0.44***</td>
+<td align="left">-0.06</td>
+<td align="left">0.49***</td>
+<td align="left">0.55***</td>
+<td align="left">0.52***</td>
+</tr>
+<tr class="odd">
+<td align="left">POS_2</td>
+<td align="left">-0.05</td>
+<td align="left">-0.1</td>
+<td align="left">1***</td>
+<td align="left">-0.22</td>
+<td align="left">0.88***</td>
+<td align="left">-0.16</td>
+<td align="left">0.82***</td>
+<td align="left">-0.14</td>
+<td align="left">-0.2</td>
+<td align="left">-0.19</td>
+</tr>
+<tr class="even">
+<td align="left">NEG_2</td>
+<td align="left">0.19</td>
+<td align="left">0.42***</td>
+<td align="left">-0.22*</td>
+<td align="left">1***</td>
+<td align="left">-0.17</td>
+<td align="left">0.84***</td>
+<td align="left">-0.14</td>
+<td align="left">0.66***</td>
+<td align="left">0.56***</td>
+<td align="left">0.53***</td>
+</tr>
+<tr class="odd">
+<td align="left">POS_3</td>
+<td align="left">0.09</td>
+<td align="left">-0.08</td>
+<td align="left">0.88***</td>
+<td align="left">-0.17</td>
+<td align="left">1***</td>
+<td align="left">-0.16</td>
+<td align="left">0.84***</td>
+<td align="left">-0.12</td>
+<td align="left">-0.22</td>
+<td align="left">-0.22</td>
+</tr>
+<tr class="even">
+<td align="left">NEG_3</td>
+<td align="left">0.25*</td>
+<td align="left">0.44***</td>
+<td align="left">-0.16</td>
+<td align="left">0.84***</td>
+<td align="left">-0.16</td>
+<td align="left">1***</td>
+<td align="left">-0.16</td>
+<td align="left">0.71***</td>
+<td align="left">0.54***</td>
+<td align="left">0.55***</td>
+</tr>
+<tr class="odd">
+<td align="left">POS_4</td>
+<td align="left">0.02</td>
+<td align="left">-0.06</td>
+<td align="left">0.82***</td>
+<td align="left">-0.14</td>
+<td align="left">0.84***</td>
+<td align="left">-0.16</td>
+<td align="left">1***</td>
+<td align="left">-0.28</td>
+<td align="left">-0.15</td>
+<td align="left">-0.16</td>
+</tr>
+<tr class="even">
+<td align="left">NEG_4</td>
+<td align="left">0.34***</td>
+<td align="left">0.49***</td>
+<td align="left">-0.14</td>
+<td align="left">0.66***</td>
+<td align="left">-0.12</td>
+<td align="left">0.71***</td>
+<td align="left">-0.28**</td>
+<td align="left">1***</td>
+<td align="left">0.52***</td>
+<td align="left">0.51***</td>
+</tr>
+<tr class="odd">
+<td align="left">CESD</td>
+<td align="left">0.28**</td>
+<td align="left">0.55***</td>
+<td align="left">-0.2</td>
+<td align="left">0.56***</td>
+<td align="left">-0.22*</td>
+<td align="left">0.54***</td>
+<td align="left">-0.15</td>
+<td align="left">0.52***</td>
+<td align="left">1***</td>
+<td align="left">0.8***</td>
+</tr>
+<tr class="even">
+<td align="left">GAD7</td>
+<td align="left">0.34**</td>
+<td align="left">0.52***</td>
+<td align="left">-0.19</td>
+<td align="left">0.53***</td>
+<td align="left">-0.22*</td>
+<td align="left">0.55***</td>
+<td align="left">-0.16</td>
+<td align="left">0.51***</td>
+<td align="left">0.8***</td>
+<td align="left">1***</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note.</em> POS/NEG denote positive/negative mood; suffixes 2, 3,
+and 4 denote pre-ABM, post-ABM/pre-Tangram, and post-Tangram,
+respectively. CESD and GAD7 are baseline depressive and anxiety symptom
+control measures. Correlation values and significance markers retain the
+original <code>psych::corr.test</code> defaults.</p>
 <p><strong>Tangram Performance</strong></p>
 <p>Tangram performance was operationalized as the number of correctly
 completed puzzles.</p>
 <pre class="r"><code>round(psych::describe(qu2$Tangrams), 2)</code></pre>
 <pre><code>##    vars  n mean   sd median trimmed  mad min max range skew kurtosis   se
 ## X1    1 92 0.73 0.77      1    0.66 1.48   0   2     2  0.5    -1.18 0.08</code></pre>
-<p><strong>Response Accuracy</strong></p>
-<p>Response accuracy was defined as the number of trials in which the
-changed word was correctly identified. Descriptive statistics were
-computed separately for the pre-ABM (t1) and post-ABM (t2)
-assessments.</p>
-<pre class="r"><code>accuracy &lt;- correct_responses %&gt;% group_by(subject_id, Temps_de_mesure) %&gt;% summarize(correct_response = sum(correct_response))
-
-accuracy_1 &lt;- accuracy$correct_response[accuracy$Temps_de_mesure == &quot;T1&quot;]
-accuracy_2 &lt;- accuracy$correct_response[accuracy$Temps_de_mesure == &quot;T2&quot;]
-
-describe(accuracy_1)</code></pre>
-<pre><code>##    vars  n  mean   sd median trimmed  mad min max range skew kurtosis   se
-## X1    1 92 73.77 1.41     74   74.01 1.48  69  75     6 -1.3      1.2 0.15</code></pre>
-<pre class="r"><code>describe(accuracy_2)</code></pre>
-<pre><code>##    vars  n  mean   sd median trimmed  mad min max range  skew kurtosis   se
-## X1    1 92 73.87 1.41     74   74.11 1.48  66  75     9 -2.29     8.88 0.15</code></pre>
-<p><strong>Rule Awareness</strong></p>
-<p>Rule awareness was assessed at the end of each block and coded as a
-binary variable (0 = no, 1 = yes). For descriptive purposes, block-level
-responses were summed within time point, yielding the number of blocks
-in which participants reported awareness of the rule at t1 and t2.</p>
-<pre class="r"><code>rule_awareness &lt;- rt2 %&gt;%
-  group_by(subject_id, block_id, block_nr, Temps_de_mesure) %&gt;%
-  summarise(guessed_block_rule = mean(as.numeric(as.character(guessed_block_rule))), .groups = &quot;drop&quot;) %&gt;%
-  group_by(subject_id, Temps_de_mesure) %&gt;%
-  summarise(guessed_block_rule = sum(guessed_block_rule), .groups = &quot;drop&quot;)
-
-rule_awareness_1 &lt;- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == &quot;T1&quot;]
-rule_awareness_2 &lt;- rule_awareness$guessed_block_rule[rule_awareness$Temps_de_mesure == &quot;T2&quot;]
-
-round(describe(rule_awareness_1), 2)</code></pre>
-<pre><code>##    vars  n mean   sd median trimmed  mad min max range  skew kurtosis   se
-## X1    1 92 7.62 2.56      8       8 2.97   1  10     9 -1.01     0.01 0.27</code></pre>
-<pre class="r"><code>round(describe(rule_awareness_2), 2)</code></pre>
-<pre><code>##    vars  n mean  sd median trimmed mad min max range  skew kurtosis   se
-## X1    1 92  9.1 1.7     10    9.51   0   2  10     8 -2.37     5.67 0.18</code></pre>
 </div>
 <div id="distributional-inspection" class="section level2">
 <h2>Distributional Inspection</h2>
@@ -1245,9 +1872,10 @@ plot(density(na.omit(rt_qu2$response_time_2)),
 in Study 1, with Neutral specified as the reference category. For
 response-time models, semantic category referred to the changed word;
 for eye-tracking models, it referred to the AOI category. Planned
-<code>emmeans</code> comparisons tested emotional valence, success
-versus failure, performance relevance, and non-neutral versus neutral
-content following a supported omnibus interaction.</p>
+<code>emmeans</code> comparisons tested emotional valence (positive
+versus negative), success versus failure, performance-irrelevant versus
+performance-relevant, and neutral versus non-neutral content following a
+supported omnibus interaction.</p>
 <pre class="r"><code>semantic_levels &lt;- c(&quot;Neutral&quot;, &quot;Positive&quot;, &quot;Negative&quot;, &quot;Success&quot;, &quot;Failure&quot;)
 
 rt_qu2$Change_category_f &lt;- factor(
@@ -1259,20 +1887,20 @@ stopifnot(levels(rt_qu2$Change_category_f)[1] == &quot;Neutral&quot;)
 # Planned comparisons among factor levels. Each vector is explicitly named to
 # show the category mapping and uses the agreed integer coding.
 semantic_planned &lt;- list(
-  # Negative minus positive, irrespective of performance relevance
+  # Positive versus negative, irrespective of performance relevance
   positive_vs_negative = c(
     Neutral = 0, Positive = -1, Negative = 1, Success = -1, Failure = 1
   ),
-  # Failure minus success
-  Success_Failure = c(
+  # Success versus failure
+  success_vs_failure = c(
     Neutral = 0, Positive = 0, Negative = 0, Success = -1, Failure = 1
   ),
-  # Performance-relevant minus performance-irrelevant
+  # Performance-irrelevant versus performance-relevant
   performance_irrelevant_vs_relevant = c(
     Neutral = -2, Positive = -2, Negative = -2, Success = 3, Failure = 3
   ),
-  # All non-neutral categories minus Neutral
-  NonNeutral_vs_Neutral = c(
+  # Neutral versus non-neutral
+  neutral_vs_nonneutral = c(
     Neutral = -4, Positive = 1, Negative = 1, Success = 1, Failure = 1
   )
 )
@@ -1406,8 +2034,8 @@ detection of the semantic rule across blocks.</p>
 <div id="group-equivalence" class="section level2">
 <h2>Group Equivalence</h2>
 <p>One-way ANOVAs were conducted to assess equivalence across ABM
-conditions for task performance, perfectionism, and baseline
-psychological distress.</p>
+conditions for task performance, perfectionism, and baseline depressive
+and anxiety symptoms.</p>
 <pre class="r"><code># Tangram performance
 fit_Tangrams &lt;- lm(Tangrams ~ Condition, data = qu2)
 anova(fit_Tangrams)</code></pre>
@@ -1434,7 +2062,7 @@ anova(fit_Concerns)</code></pre>
 ##           Df Sum Sq Mean Sq F value Pr(&gt;F)
 ## Condition  2   6.63  3.3160  0.5683 0.5685
 ## Residuals 89 519.33  5.8352</code></pre>
-<pre class="r"><code># Baseline distress
+<pre class="r"><code># Baseline depressive and anxiety symptom control variables
 fit_Depression &lt;- lm(CESD ~ Condition, data = qu2)
 anova(fit_Depression)</code></pre>
 <pre><code>## Analysis of Variance Table
@@ -1787,7 +2415,7 @@ summary(mc_first_fix_prob)</code></pre>
 ##   0.8002 0.0318689 TRUE             
 ##   0.1123 0.0318689 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1           estimate        SE  df  asymp.LCL  asymp.UCL z.ratio
 ##  Failure - Control  0.0096748 0.0984644 Inf -0.1833118  0.2026615   0.098
 ##  Success - Control  0.1193805 0.0966001 Inf -0.0699522  0.3087131   1.236
@@ -1803,7 +2431,7 @@ summary(mc_first_fix_prob)</code></pre>
 ##   0.0767 0.0318689 TRUE             
 ##   0.5404 0.0318689 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1           estimate        SE  df  asymp.LCL  asymp.UCL z.ratio
 ##  Failure - Control -0.2822060 0.3142870 Inf -0.8981972  0.3337852  -0.898
 ##  Success - Control -0.7524423 0.3063351 Inf -1.3528481 -0.1520364  -2.456
@@ -2042,7 +2670,7 @@ summary(mc_dwell_time_early)</code></pre>
 ##   0.3258 0.04398865 TRUE             
 ##   0.0611 0.04398865 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1           estimate         SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control  0.0946822 0.07565993 Inf -0.0536085 0.2429729   1.251
 ##  Success - Control  0.1160279 0.07405664 Inf -0.0291205 0.2611762   1.567
@@ -2058,7 +2686,7 @@ summary(mc_dwell_time_early)</code></pre>
 ##   0.0066 0.04398865 TRUE             
 ##   0.6497 0.04398865 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1           estimate         SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control  0.2643586 0.24285999 Inf -0.2116383 0.7403554   1.089
 ##  Success - Control -0.2807292 0.23439211 Inf -0.7401293 0.1786709  -1.198
@@ -2211,7 +2839,7 @@ summary(mc_dwell_time_intermediate)</code></pre>
 ##   0.6680 0.02665837 TRUE             
 ##   0.9674 0.02665837 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1          estimate         SE  df   asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control 0.0356077 0.05873269 Inf -0.07950623 0.1507217   0.606
 ##  Success - Control 0.1115342 0.05625778 Inf  0.00127097 0.2217974   1.983
@@ -2227,7 +2855,7 @@ summary(mc_dwell_time_intermediate)</code></pre>
 ##   0.1208 0.02665837 TRUE             
 ##   0.0176 0.02665837 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1          estimate         SE  df   asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control 0.2510083 0.18299210 Inf -0.10764963 0.6096662   1.372
 ##  Success - Control 0.0658530 0.17632171 Inf -0.27973121 0.4114372   0.373
@@ -2380,7 +3008,7 @@ summary(mc_dwell_time_late)</code></pre>
 ##   0.0030 0.0002708687 TRUE             
 ##   0.3396 0.0002708687 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1           estimate        SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control  0.0960632 0.0919433 Inf -0.0841423 0.2762687   1.045
 ##  Success - Control -0.1123372 0.0876443 Inf -0.2841169 0.0594424  -1.282
@@ -2396,7 +3024,7 @@ summary(mc_dwell_time_late)</code></pre>
 ##   0.0639 0.0002708687 TRUE             
 ##   0.1849 0.0002708687 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1           estimate        SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control -0.5010093 0.2893494 Inf -1.0681236 0.0661051  -1.732
 ##  Success - Control -0.1574317 0.2748565 Inf -0.6961406 0.3812772  -0.573
@@ -2548,7 +3176,7 @@ summary(mc_dwell_time)</code></pre>
 ##   0.0442 0.003394294 TRUE             
 ##   0.9679 0.003394294 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1           estimate         SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control  0.0197714 0.04601368 Inf -0.0704138 0.1099565   0.430
 ##  Success - Control  0.0142644 0.04415431 Inf -0.0722765 0.1008053   0.323
@@ -2564,7 +3192,7 @@ summary(mc_dwell_time)</code></pre>
 ##   0.0034 0.003394294 TRUE             
 ##   0.0117 0.003394294 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1           estimate         SE  df  asymp.LCL asymp.UCL z.ratio
 ##  Failure - Control  0.0190610 0.14428890 Inf -0.2637400 0.3018621   0.132
 ##  Success - Control -0.0964285 0.13830163 Inf -0.3674947 0.1746377  -0.697
@@ -2729,7 +3357,7 @@ summary(mc_response_time)</code></pre>
 ##   0.4301 0.0009054155 TRUE             
 ##   0.5439 0.0009054155 TRUE             
 ## 
-## contrast = Success_Failure:
+## contrast = success_vs_failure:
 ##  contrast1           estimate         SE  df  asymp.LCL  asymp.UCL z.ratio
 ##  Failure - Control -0.0177337 0.04736024 Inf -0.1105581  0.0750907  -0.374
 ##  Success - Control -0.0366336 0.04631450 Inf -0.1274084  0.0541411  -0.791
@@ -2745,7 +3373,7 @@ summary(mc_response_time)</code></pre>
 ##   0.0059 0.0009054155 TRUE             
 ##   0.1171 0.0009054155 TRUE             
 ## 
-## contrast = NonNeutral_vs_Neutral:
+## contrast = neutral_vs_nonneutral:
 ##  contrast1           estimate         SE  df  asymp.LCL  asymp.UCL z.ratio
 ##  Failure - Control  0.2662323 0.14993284 Inf -0.0276306  0.5600953   1.776
 ##  Success - Control  0.4360644 0.14615159 Inf  0.1496126  0.7225163   2.984
@@ -3203,6 +3831,129 @@ for (model_name in names(family_comparison_models)) {
 }</code></pre>
 <p><img role="img" src="data:image/png;base64,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" width="960" /></p>
 </div>
+<div id="decomposing-the-retained-interaction" class="section level3">
+<h3>Decomposing the retained interaction</h3>
+<p>The retained post-Tangram negative-mood Tweedie model was refitted
+with Failure and then Success as the reference condition. These refits
+retain the same complete-case sample, predictors, Tweedie family, and
+log link. The <code>Perf_Strivings_c</code> coefficient tests the
+Strivings slope within the reference condition: Control in the original
+model, Failure in the first refit, and Success in the second.
+Interaction coefficients test differences between condition-specific
+slopes. Slopes are expressed on the log scale and are interpreted
+separately from the supported between-condition interaction.</p>
+<pre class="r"><code>mood_negative_cc_failure &lt;- mood_negative_cc
+mood_negative_cc_failure$Condition &lt;- relevel(
+  mood_negative_cc_failure$Condition, ref = &quot;Failure&quot;
+)
+
+glm1.2_negative_failure_ref &lt;- update(
+  glm1.2_negative,
+  data = mood_negative_cc_failure
+)
+summary(glm1.2_negative_failure_ref)</code></pre>
+<pre><code>##  Family: tweedie  ( log )
+## Formula:          
+## NEG_4 ~ NEG_3 + Perf_Strivings_c * Condition + Perf_Concerns_c *  
+##     Condition + CESD + GAD7
+## Data: mood_negative_cc_failure
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    432.0    467.3   -202.0    404.0       78 
+## 
+## 
+## Dispersion parameter for tweedie family (): 1.58 
+## 
+## Conditional model:
+##                                    Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                        0.571994   0.234965   2.434   0.0149 *  
+## NEG_3                              0.139154   0.023699   5.872 4.31e-09 ***
+## Perf_Strivings_c                   0.163648   0.070727   2.314   0.0207 *  
+## ConditionControl                  -0.008284   0.194933  -0.042   0.9661    
+## ConditionSuccess                   0.001425   0.200391   0.007   0.9943    
+## Perf_Concerns_c                    0.092634   0.073597   1.259   0.2081    
+## CESD                               0.003574   0.009953   0.359   0.7196    
+## GAD7                               0.020749   0.018867   1.100   0.2714    
+## Perf_Strivings_c:ConditionControl -0.247164   0.120155  -2.057   0.0397 *  
+## Perf_Strivings_c:ConditionSuccess -0.328373   0.130677  -2.513   0.0120 *  
+## ConditionControl:Perf_Concerns_c  -0.021637   0.101239  -0.214   0.8308    
+## ConditionSuccess:Perf_Concerns_c   0.050881   0.111150   0.458   0.6471    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>mood_negative_cc_success &lt;- mood_negative_cc
+mood_negative_cc_success$Condition &lt;- relevel(
+  mood_negative_cc_success$Condition, ref = &quot;Success&quot;
+)
+
+glm1.2_negative_success_ref &lt;- update(
+  glm1.2_negative,
+  data = mood_negative_cc_success
+)
+summary(glm1.2_negative_success_ref)</code></pre>
+<pre><code>##  Family: tweedie  ( log )
+## Formula:          
+## NEG_4 ~ NEG_3 + Perf_Strivings_c * Condition + Perf_Concerns_c *  
+##     Condition + CESD + GAD7
+## Data: mood_negative_cc_success
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    432.0    467.3   -202.0    404.0       78 
+## 
+## 
+## Dispersion parameter for tweedie family (): 1.58 
+## 
+## Conditional model:
+##                                    Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                        0.573417   0.195607   2.931  0.00337 ** 
+## NEG_3                              0.139154   0.023699   5.872 4.31e-09 ***
+## Perf_Strivings_c                  -0.164725   0.109607  -1.503  0.13287    
+## ConditionControl                  -0.009709   0.186649  -0.052  0.95851    
+## ConditionFailure                  -0.001425   0.200391  -0.007  0.99432    
+## Perf_Concerns_c                    0.143515   0.088577   1.620  0.10518    
+## CESD                               0.003574   0.009953   0.359  0.71955    
+## GAD7                               0.020749   0.018867   1.100  0.27143    
+## Perf_Strivings_c:ConditionControl  0.081207   0.148175   0.548  0.58366    
+## Perf_Strivings_c:ConditionFailure  0.328372   0.130677   2.513  0.01198 *  
+## ConditionControl:Perf_Concerns_c  -0.072517   0.112534  -0.644  0.51932    
+## ConditionFailure:Perf_Concerns_c  -0.050881   0.111150  -0.458  0.64712    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The following table reports each condition-specific Strivings slope,
+its standard error, Wald 95% confidence interval, and unadjusted
+two-sided p value.</p>
+<pre class="r"><code>negative_mood_reference_models &lt;- list(
+  Control = glm1.2_negative,
+  Failure = glm1.2_negative_failure_ref,
+  Success = glm1.2_negative_success_ref
+)
+
+stopifnot(all(vapply(negative_mood_reference_models, nobs, numeric(1)) ==
+                nrow(mood_negative_cc)))
+
+negative_mood_strivings_slopes &lt;- do.call(
+  rbind,
+  lapply(names(negative_mood_reference_models), function(condition_name) {
+    model &lt;- negative_mood_reference_models[[condition_name]]
+    coefficient &lt;- summary(model)$coefficients$cond[&quot;Perf_Strivings_c&quot;, ]
+    data.frame(
+      Condition = condition_name,
+      estimate = unname(coefficient[&quot;Estimate&quot;]),
+      SE = unname(coefficient[&quot;Std. Error&quot;]),
+      lower.CL = unname(coefficient[&quot;Estimate&quot;] -
+                         qnorm(0.975) * coefficient[&quot;Std. Error&quot;]),
+      upper.CL = unname(coefficient[&quot;Estimate&quot;] +
+                         qnorm(0.975) * coefficient[&quot;Std. Error&quot;]),
+      z = unname(coefficient[&quot;z value&quot;]),
+      p.value = unname(coefficient[&quot;Pr(&gt;|z|)&quot;])
+    )
+  })
+)
+negative_mood_strivings_slopes</code></pre>
+<pre><code>##   Condition    estimate         SE    lower.CL   upper.CL          z    p.value
+## 1   Control -0.08351598 0.09939663 -0.27832978 0.11129783 -0.8402295 0.40077973
+## 2   Failure  0.16364755 0.07072746  0.02502428 0.30227082  2.3137768 0.02067997
+## 3   Success -0.16472499 0.10960700 -0.37955076 0.05010079 -1.5028692 0.13287278</code></pre>
+</div>
 <div id="distributional-model-diagnostics" class="section level3">
 <h3>Distributional Model Diagnostics</h3>
 <p>The following plots examine residual patterns from the best-supported
@@ -3255,9 +4006,9 @@ Perfectionistic Strivings with ABM condition for post-Tangram negative
 mood only. All lines are solid; the failure-condition line is thicker
 and shown at full opacity because the Strivings-by-Failure versus
 Control coefficient was significant, whereas the control and success
-lines are thinner and lighter. This visual emphasis does not imply that
-the within-condition Strivings slope was separately tested or
-significant.</p>
+lines are thinner and lighter. This visual emphasis reflects the
+between-condition interaction; the condition-specific Strivings slope
+tests are reported separately above.</p>
 <pre class="r"><code>pred_neg_ps &lt;- ggpredict(
   glm1.2_negative,
   terms = c(&quot;Perf_Strivings_c [all]&quot;, &quot;Condition&quot;),

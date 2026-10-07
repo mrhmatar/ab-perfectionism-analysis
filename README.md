@@ -1,5 +1,7 @@
 # Analysis of Attention Bias in Perfectionism
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23214857.svg)](https://doi.org/10.5281/zenodo.23214857)
+
 This repository contains the R code and supporting materials associated with:
 
 > Matar, M., Delor, B., Douilliez, C., & Philippot, P. (2026). *Attention bias and emotional reactivity in perfectionism: Eye-tracking and experimental evidence for context-dependent effects.* Manuscript in preparation.

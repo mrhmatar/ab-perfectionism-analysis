@@ -8,8 +8,9 @@ license: MIT
 repository-code: "https://github.com/mrhmatar/ab-perfectionism-analysis"
 
 authors:
-  - family-names: Matar
-    given-names: Mariah
+  - family-names: "Matar"
+    given-names: "Mariah"
+    orcid: "https://orcid.org/0009-0004-3983-3082"
 
 preferred-citation:
   type: article

@@ -306,13 +306,12 @@ The repository can be cited independently of the associated paper:
 ```bibtex
 @software{matar2026abperfectionism_zenodo,
   author    = {Matar, M.},
-  title     = {ab-perfectionism-analysis:
-               Analysis of Attention Biases in Perfectionism},
+  title     = {Analysis of Attention Biases in Perfectionism},
   year      = {2026},
   version   = {1.0.0},
   publisher = {Zenodo},
-  doi       = {[ZENODO DOI]},
-  url       = {https://doi.org/[ZENODO DOI]}
+  doi       = {10.5281/zenodo.23214857},
+  url       = {[https://github.com/mrhmatar/ab-perfectionism-analysis]}
 }
 ```
 

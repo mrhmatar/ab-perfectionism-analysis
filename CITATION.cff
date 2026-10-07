@@ -1,19 +1,19 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it using the metadata below."
-title: "ab-perfectionism-analysis: Analysis of Attention Biases in Perfectionism"
+title: "Analysis code for Attention Bias and Emotional Reactivity in Perfectionism"
 type: software
-version: 1.0.0
-date-released: 2026-09-13
+version: 1.0.1
+date-released: "2026-10-07"
+license: MIT
+repository-code: "https://github.com/mrhmatar/ab-perfectionism-analysis"
+
 authors:
   - family-names: Matar
     given-names: Mariah
-repository-code: "https://github.com/mrhmatar/ab-perfectionism-analysis"
-license: MIT
+
 preferred-citation:
   type: article
   title: "Attention Bias and Emotional Reactivity in Perfectionism: Eye-Tracking and Experimental Evidence for Context-Dependent Effects"
-  year: 2026
-  status: manuscript in preparation
   authors:
     - family-names: Matar
       given-names: Mariah
@@ -23,6 +23,7 @@ preferred-citation:
       given-names: Céline
     - family-names: Philippot
       given-names: Pierre
+  year: 2026
 
   abstract: >-
      Analysis code and supporting materials for two studies of attention

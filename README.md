@@ -311,7 +311,7 @@ The repository can be cited independently of the associated paper:
   version   = {1.0.0},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.23214857},
-  url       = {[https://github.com/mrhmatar/ab-perfectionism-analysis]}
+  url       = {https://github.com/mrhmatar/ab-perfectionism-analysis}
 }
 ```
 
